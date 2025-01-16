@@ -6,16 +6,13 @@ AppBar header({String? titleText}) {
     title: Text(
       titleText ?? "DIVERSITREE",
       style: TextStyle(
-        color: textColor,
+        color: AppTextColors.onPrimary,
         fontWeight: FontWeight.bold,
       ),
     ),
-    backgroundColor: bgColor,
-    // leading: IconButton(
-    //   icon: Icon(Icons.arrow_back_ios_new, color: textColor),
-    //   onPressed: () => {
-    //     // Navigator.of(context).pop()
-    //   },
-    // )
+    backgroundColor: AppColors.primary,
+    iconTheme: IconThemeData(
+      color: Colors.white
+    ),
   );
 }

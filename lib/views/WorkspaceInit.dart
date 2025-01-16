@@ -6,17 +6,41 @@ class WorkspaceInit extends StatefulWidget {
 }
 
 class _WorkspaceInitState extends State<WorkspaceInit> {
+  // Setting initial values for the controllers
+  final TextEditingController workspaceController = TextEditingController(text: "Workspace A");
+  final TextEditingController penganggungJawabController = TextEditingController(text: "--dummy--");
+
   @override
   Widget build(BuildContext context) {
-    print("berhasil");
-    return Scaffold(
-      appBar: AppBar(title: Text("Workspace Initialization")),
-      body: Center(
-        child: Text(
-          "You are on the Workspace Initialization page!",
-          style: TextStyle(fontSize: 24),
+    return Column(
+      children: [
+        // Nama Workspace field (enabled) with default value
+        TextFormField(
+          controller: workspaceController,
+          decoration: InputDecoration(
+            labelText: "Nama Workspace",
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12), // Add border radius
+            ),
+          ),
         ),
-      ),
+        
+        SizedBox(height: 20),
+
+        // Nama Penganggung Jawab field (disabled) with default value
+        TextFormField(
+          controller: penganggungJawabController,
+          decoration: InputDecoration(
+            labelText: "Nama Penganggung Jawab",
+            floatingLabelBehavior: FloatingLabelBehavior.auto,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12), // Add border radius
+            ),
+          ),
+          enabled: false, // This disables the field
+        ),
+      ],
     );
   }
 }
