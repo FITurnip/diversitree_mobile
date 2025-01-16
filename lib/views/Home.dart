@@ -1,4 +1,4 @@
-import 'package:diversitree_mobile/components/header.dart';
+import 'package:diversitree_mobile/components/Header.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/views/WorkspaceMaster.dart';
 import 'package:flutter/material.dart';

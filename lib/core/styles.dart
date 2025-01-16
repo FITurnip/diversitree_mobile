@@ -110,3 +110,7 @@ class AppTextStyles {
     color: AppColors.danger, // Berry Red
   );
 }
+
+const appBorderRadius = 10.0;
+const appPadding = 8.0;
+const appMargin = 8.0;

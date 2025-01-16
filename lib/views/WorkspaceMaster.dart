@@ -1,6 +1,7 @@
 import 'package:diversitree_mobile/components/StepperInformation.dart';
-import 'package:diversitree_mobile/components/header.dart';
+import 'package:diversitree_mobile/components/Header.dart';
 import 'package:diversitree_mobile/core/styles.dart';
+import 'package:diversitree_mobile/views/PemotretanPohon.dart';
 import 'package:diversitree_mobile/views/WorkspaceInit.dart';
 import 'package:diversitree_mobile/views/MenentukanKoordinat.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +32,8 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
               padding: const EdgeInsets.all(8.0),
               child: Builder(builder: (context) {
                 if(urutanSaatIni == 1) return WorkspaceInit();
-                else return MenentukanKoordinat();
+                else if(urutanSaatIni == 2) return MenentukanKoordinat();
+                else return PemotretanPohon();
               })
             ),
           ),
