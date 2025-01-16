@@ -1,6 +1,5 @@
 import 'package:diversitree_mobile/views/splashscreen.dart';
 import 'package:flutter/material.dart';
-import 'package:diversitree_mobile/views/Home.dart';  // Import your Home page
 
 void main() {
   runApp(Diversitree());

@@ -1,3 +1,4 @@
+import 'package:diversitree_mobile/components/RingkasanInformasi.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:flutter/material.dart';
 
@@ -7,71 +8,92 @@ class PemotretanPohon extends StatefulWidget {
 }
 
 class _PemotretanPohonState extends State<PemotretanPohon> {
+  double infoSize = 56.0;
+  final List<String> images = [
+    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Flexible(
-              fit: FlexFit.loose,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppColors.info, // Background color
-                  borderRadius: BorderRadius.circular(appBorderRadius), // Border radius
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RingkasanInformasi(infoSize: infoSize, showCamera: true,),
+
+          Container(margin: EdgeInsets.only(bottom: 8.0), child: Text('Daftar Pohon', style: AppTextStyles.heading1,)),
+
+          GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+              childAspectRatio: 0.65,
+            ),
+            itemCount: images.length,
+            shrinkWrap: true,  // Ensures GridView is sized correctly
+            physics: NeverScrollableScrollPhysics(), // Disables internal scroll
+            itemBuilder: (context, index) {
+              return Card(
+                // color: AppColors.tertiary,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                padding: EdgeInsets.all(8), // Optional: Add padding inside the container
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 120, // Fixed width for the label
-                          child: Text(
-                            "Luas Area",
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                        child: Image.network(
+                          images[index],
+                          fit: BoxFit.cover,
                         ),
-                        Text(
-                          ": 20.3 m2",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
+                      ),
                     ),
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 120, // Fixed width for the label
-                          child: Text(
-                            "Teridentifikasi",
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Mangifera indica"),
+                          Text("Dbh: 80 m2"),
+                        ],
+                      ),
+                    ),
+
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        margin: EdgeInsets.only(right: 8.0, bottom: 8.0),
+                        decoration: BoxDecoration(
+                          color: AppColors.info,  // Set the static background color here
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        Text(
-                          ": 10 pohon",
-                          style: TextStyle(color: Colors.white),
+                        child: IconButton(
+                          icon: Icon(Icons.visibility, color: Colors.white,),  // Use visibility icon for 'view'
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Button pressed for item $index')),
+                            );
+                          },
                         ),
-                      ],
+                      )
                     ),
                   ],
                 ),
-              ),
-            ),
-
-
-            ElevatedButton.icon(onPressed: () {
-              // page route to camera screen
-            }, label: Text(""), icon: Icon(Icons.camera_alt)),
-            
-          ],
-        ),
-        Text("Percobaan"),
-      ],
-    );
+              );
+            },
+          ),
+        ],
+      );
   }
 }
