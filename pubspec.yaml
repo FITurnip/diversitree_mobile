@@ -1,5 +1,5 @@
 name: diversitree_mobile
-description: "A new Flutter project."
+description: "Diversitree project."
 publish_to: 'none'
 version: 0.1.0
 
@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   sqflite: ^2.3.0
+  google_fonts: ^6.2.1
   flutter:
     sdk: flutter
 
