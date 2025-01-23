@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class MenentukanKoordinat extends StatefulWidget {
   @override
@@ -22,29 +25,30 @@ class DashedBorderBox extends StatefulWidget {
   _DashedBorderBoxState createState() => _DashedBorderBoxState();
 }
 
-String ?selected_koordinat = null;
-
-Map<String, dynamic> koordinat = {
-  "kiri_atas": {"label": "Kiri Atas", "exist": false, "x": 0.00, "y": 0.00},
-  "kanan_atas": {"label": "Kanan Atas", "exist": true, "x": 35.47, "y": 62.19},
-  "kiri_bawah": {"label": "Kiri Bawah", "exist": false, "x": 0.00, "y": 0.00},
-  "kanan_bawah": {"label": "Kanan Bawah", "exist": true, "x": 50.23, "y": 80.42}
-};
-
-Map<String, Color> circleColor = {
-  "kiri_atas": AppColors.tertiary,
-  "kanan_atas": AppColors.tertiary,
-  "kiri_bawah": AppColors.tertiary,
-  "kanan_bawah": AppColors.tertiary,
-};
 class _DashedBorderBoxState extends State<DashedBorderBox> {
+  String selectedKoordinat = "";
+
+  Map<String, dynamic> koordinat = {
+    "kiri_atas": {"label": "Kiri Atas", "x": null as double?, "y": null as double?},
+    "kanan_atas": {"label": "Kanan Atas", "x": null as double?, "y": null as double?},
+    "kiri_bawah": {"label": "Kiri Bawah", "x": null as double?, "y": null as double?},
+    "kanan_bawah": {"label": "Kanan Bawah", "x": null as double?, "y": null as double?}
+  };
+
+  Map<String, Color> circleColor = {
+    "kiri_atas": AppColors.tertiary,
+    "kanan_atas": AppColors.tertiary,
+    "kiri_bawah": AppColors.tertiary,
+    "kanan_bawah": AppColors.tertiary,
+  };
+
   void updateColor() {
     setState(() {
       koordinat.forEach((key, value) {
-        if(key == selected_koordinat) {
+        if(key == selectedKoordinat) {
           circleColor[key] = AppColors.secondary;
         } else {
-          if (value["exist"] == true) {
+          if (value["x"] != null) {
             circleColor[key] = AppColors.primary; 
           } else {
             circleColor[key] = AppColors.tertiary;
@@ -52,6 +56,52 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
         }
       });
     });
+  }
+
+  final LocationSettings locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 1,
+  );
+  String locationMessage = 'Requesting location...';
+
+  Future<void> _checkPermissionsAndStartStream() async {
+    // Check if location permissions are granted
+    final permissionStatus = await Permission.locationWhenInUse.status;
+
+    if (permissionStatus.isGranted) {
+      // If permission is granted, start listening to the stream
+      _startLocationStream();
+    } else if (permissionStatus.isDenied || permissionStatus.isPermanentlyDenied) {
+      // Request permission
+      final result = await Permission.locationWhenInUse.request();
+
+      if (result.isGranted) {
+        _startLocationStream();
+      } else {
+        setState(() {
+          locationMessage = 'Location permission denied.';
+        });
+      }
+    }
+  }
+
+  double? latitudePosition, longitudePosition;
+
+  void _startLocationStream() {
+    Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+      (Position? position) {
+        setState(() {
+          if (position == null) {
+            locationMessage = 'Unknown location';
+          } else {
+            locationMessage =
+                'Latitude: ${position.latitude}, Longitude: ${position.longitude}';
+                latitudePosition = position.latitude;
+                longitudePosition = position.longitude;
+          }
+        });
+      },
+    );
   }
 
   @override
@@ -64,6 +114,14 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
     if (kDebugMode) {
       print(circleColor);
     }
+
+    _checkPermissionsAndStartStream();
+  }
+
+  void selectKoordinat(String newSelectedKoordinat) {
+    setState(() {
+      selectedKoordinat = newSelectedKoordinat;
+    });
   }
 
   @override
@@ -72,6 +130,13 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Center(
+        //   child: Text(
+        //     locationMessage,
+        //     style: TextStyle(fontSize: 18),
+        //     textAlign: TextAlign.center,
+        //   ),
+        // ),
         Center(
           child: Container(
             child: Stack(
@@ -97,7 +162,7 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
                     left: entry.key == 'kiri_atas' || entry.key == 'kiri_bawah' ? -8 : null,
                     right: entry.key == 'kanan_atas' || entry.key == 'kanan_bawah' ? -8 : null,
                     bottom: entry.key == 'kiri_bawah' || entry.key == 'kanan_bawah' ? -8 : null,
-                    child: CircleContainer(position: entry.key, onTap: () {updateColor();}),
+                    child: CircleContainer(position: entry.key, onTap: () {updateColor();}, selectKoordinat: (newSelectedKoordinat) {selectKoordinat(newSelectedKoordinat);}, circleColor: circleColor),
                   ),
               ],
             ),
@@ -109,9 +174,10 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
         for (var entry in koordinat.entries)
           GestureDetector(
             onTap: () {
-              setState(() {
-                selected_koordinat = entry.key;
-              });
+              // setState(() {
+              //   selectedKoordinat = entry.key;
+              // });
+              selectKoordinat(entry.key);
               updateColor();
             },
             child: Container(
@@ -149,8 +215,8 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
             ),
             children: [
               Text("Terkini", style: TextStyle(fontWeight: FontWeight.bold, color: AppTextColors.onInfo),),
-              Text("x: 0.00", style: TextStyle(color: AppTextColors.onInfo)),
-              Text("y: 0.00", style: TextStyle(color: AppTextColors.onInfo)),
+              Text("x: ${latitudePosition}", style: TextStyle(color: AppTextColors.onInfo)),
+              Text("y: ${longitudePosition}", style: TextStyle(color: AppTextColors.onInfo)),
             ],
           ),
         ),
@@ -160,6 +226,10 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
           child: ElevatedButton.icon(
             onPressed: () {
               // Handle the button press here
+              setState(() {
+                koordinat[selectedKoordinat]?['x'] = latitudePosition;
+                koordinat[selectedKoordinat]?['y'] = longitudePosition;
+              });
             },
             icon: Icon(Icons.location_on), // Location icon
             label: Text('Tandai Lokasi'),
@@ -172,15 +242,18 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
 
 class CircleContainer extends StatefulWidget {
   final String position;
+  final Function(String) selectKoordinat;
   final Function onTap;
+  final Map<String, Color> circleColor;
 
-  CircleContainer({required this.position, required this.onTap});
+  CircleContainer({required this.position, required this.onTap, required this.selectKoordinat, required this.circleColor});
 
   @override
   _CircleContainerState createState() => _CircleContainerState();
 }
 
 class _CircleContainerState extends State<CircleContainer> {
+  late String selectedKoordinat;
   @override
   void initState() {
     super.initState();
@@ -190,9 +263,7 @@ class _CircleContainerState extends State<CircleContainer> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          selected_koordinat = widget.position;
-        });
+        widget.selectKoordinat(widget.position);
         widget.onTap();
       },
       child: Padding(
@@ -201,7 +272,7 @@ class _CircleContainerState extends State<CircleContainer> {
           width: 20, // Circle diameter
           height: 20, // Circle diameter
           decoration: BoxDecoration(
-            color: circleColor[widget.position], // Set the background color based on state
+            color: widget.circleColor[widget.position], // Set the background color based on state
             shape: BoxShape.circle, // Circular shape
             border: Border.all(color: Colors.grey.shade900, width: 2.0), // Border for the circle
           ),
@@ -246,13 +317,4 @@ class DashedBorderPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) {
     return false;
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(title: Text("Dashed Border with Circle Containers on Corners")),
-      body: Center(child: MenentukanKoordinat()),
-    ),
-  ));
 }
