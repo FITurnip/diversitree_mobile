@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
 
 class WorkspaceInit extends StatefulWidget {
+  final Map<String, dynamic> workspaceData;
+
+  WorkspaceInit({required this.workspaceData});
   @override
   _WorkspaceInitState createState() => _WorkspaceInitState();
 }
 
 class _WorkspaceInitState extends State<WorkspaceInit> {
+  Map<String, dynamic> workspaceData = {};
+
   // Setting initial values for the controllers
-  final TextEditingController workspaceController = TextEditingController(text: "Workspace A");
+  final TextEditingController namaWorkspaceController = TextEditingController();
   final TextEditingController penganggungJawabController = TextEditingController(text: "--dummy--");
+
+  @override
+  void initState() {
+    super.initState();
+    workspaceData = widget.workspaceData;
+    namaWorkspaceController.text = workspaceData["nama_workspace"] ?? "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +28,7 @@ class _WorkspaceInitState extends State<WorkspaceInit> {
       children: [
         // Nama Workspace field (enabled) with default value
         TextFormField(
-          controller: workspaceController,
+          controller: namaWorkspaceController,
           decoration: InputDecoration(
             labelText: "Nama Workspace",
             floatingLabelBehavior: FloatingLabelBehavior.auto,
@@ -24,6 +36,13 @@ class _WorkspaceInitState extends State<WorkspaceInit> {
               borderRadius: BorderRadius.circular(12), // Add border radius
             ),
           ),
+          onChanged: ((value) => {
+            setState(() {
+              // Update workspaceData whenever the input changes
+              workspaceData["nama_workspace"] = value;
+              // widget.workspaceData["nama_workspace"] = value;
+            })
+          }),
         ),
         
         SizedBox(height: 20),

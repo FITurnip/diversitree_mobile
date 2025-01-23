@@ -1,4 +1,5 @@
-import 'package:diversitree_mobile/views/splashscreen.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:diversitree_mobile/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -15,6 +16,16 @@ class Diversitree extends StatefulWidget {
 }
 
 class DiversitreeState extends State<Diversitree> {
+  Future<void> requestPermissions() async {
+    await Permission.storage.request();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    requestPermissions();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

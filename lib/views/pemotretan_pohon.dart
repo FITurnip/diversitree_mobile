@@ -1,4 +1,4 @@
-import 'package:diversitree_mobile/components/RingkasanInformasi.dart';
+import 'package:diversitree_mobile/components/ringkasan_informasi.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:flutter/material.dart';
 

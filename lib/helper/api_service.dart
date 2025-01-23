@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart'; // For kDebugMode
 
-class Apiservice {
+class ApiService {
   static const _prefixUrl = '192.168.100.36:8000'; // The base URL without protocol
 
   static Uri _setUri(path) {
@@ -19,15 +19,15 @@ class Apiservice {
 
     // Print details in debug mode
     if (kDebugMode) {
-      print('GET Request URL: $_url');
+      print('ApiService: GET Request URL: $_url');
     }
 
     var response = await http.get(_url);
 
     // Print the response in debug mode
     if (kDebugMode) {
-      print('Response Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
+      print('ApiService: Response Status Code: ${response.statusCode}');
+      print('ApiService: Response Body: ${response.body}');
     }
 
     return response;
@@ -39,8 +39,8 @@ class Apiservice {
 
     // Print details in debug mode
     if (kDebugMode) {
-      print('POST Request URL: $_url');
-      print('Request Body: ${json.encode(body)}');
+      print('ApiService: POST Request URL: $_url');
+      print('ApiService: Request Body: ${json.encode(body)}');
     }
 
     var response = await http.post(
@@ -51,8 +51,8 @@ class Apiservice {
 
     // Print the response in debug mode
     if (kDebugMode) {
-      print('Response Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
+      print('ApiService: Response Status Code: ${response.statusCode}');
+      print('ApiService: Response Body: ${response.body}');
     }
 
     return response;

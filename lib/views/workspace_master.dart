@@ -1,23 +1,38 @@
-import 'package:diversitree_mobile/components/StepperButton.dart';
-import 'package:diversitree_mobile/components/StepperInformation.dart';
-import 'package:diversitree_mobile/components/Header.dart';
-import 'package:diversitree_mobile/core/styles.dart';
-import 'package:diversitree_mobile/views/PemotretanPohon.dart';
-import 'package:diversitree_mobile/views/ShannonWannerTable.dart';
-import 'package:diversitree_mobile/views/WorkspaceInit.dart';
-import 'package:diversitree_mobile/views/MenentukanKoordinat.dart';
+import 'dart:convert';
+
+import 'package:diversitree_mobile/components/stepper_button.dart';
+import 'package:diversitree_mobile/components/stepper_information.dart';
+import 'package:diversitree_mobile/components/header.dart';
+import 'package:diversitree_mobile/core/workspace_service.dart';
+import 'package:diversitree_mobile/helper/api_service.dart';
+import 'package:diversitree_mobile/helper/local_db_service.dart';
+import 'package:diversitree_mobile/views/pemotretan_pohon.dart';
+import 'package:diversitree_mobile/views/shannon_wanner_table.dart';
+import 'package:diversitree_mobile/views/workspace_init.dart';
+import 'package:diversitree_mobile/views/menentukan_koordinat.dart';
 import 'package:flutter/material.dart';
 
 class WorkspaceMaster extends StatefulWidget {
   // Constructor to accept the widget content
-  WorkspaceMaster();
+  final int urutanSaatIni;
+  final Map<String, dynamic> workspaceData;
+
+  WorkspaceMaster({required this.urutanSaatIni, required this.workspaceData});
 
   @override
   _WorkspaceMasterState createState() => _WorkspaceMasterState();
 }
 
 class _WorkspaceMasterState extends State<WorkspaceMaster> {
-  int urutanSaatIni = 1;
+  late int urutanSaatIni;
+  Map<String, dynamic> workspaceData = {};
+  
+  @override
+  void initState() {
+    super.initState();
+    urutanSaatIni = widget.urutanSaatIni;
+    workspaceData = widget.workspaceData;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +54,7 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
                     padding: const EdgeInsets.all(8.0),
                     child: Builder(builder: (context) {
                       if (urutanSaatIni == 1)
-                        return WorkspaceInit();
+                        return WorkspaceInit(workspaceData: workspaceData);
                       else if (urutanSaatIni == 2)
                         return MenentukanKoordinat();
                       else if (urutanSaatIni == 3)
@@ -59,7 +74,8 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
             bottom: 0,
             child: StepperButton(
               urutanSaatIni: urutanSaatIni,
-              onStepChanged: (urutanTerbaru) {
+              onStepChanged: (urutanTerbaru) async {
+                if(urutanSaatIni == 1) await WorkspaceService.saveInformasi(workspaceData);
                 setState(() {
                   urutanSaatIni = urutanTerbaru;
                 });

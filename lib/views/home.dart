@@ -1,10 +1,18 @@
-import 'package:diversitree_mobile/components/Header.dart';
+import 'dart:convert';
+
+import 'package:diversitree_mobile/components/header.dart';
 import 'package:diversitree_mobile/core/styles.dart';
-import 'package:diversitree_mobile/views/WorkspaceMaster.dart';
+import 'package:diversitree_mobile/core/workspace_service.dart';
+import 'package:diversitree_mobile/helper/api_service.dart';
+import 'package:diversitree_mobile/helper/format_text_service.dart';
+import 'package:diversitree_mobile/views/workspace_master.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final List<Map<String, dynamic>> workspaceTable;
+
+  // Update the constructor to accept workspaceTable as a parameter
+  const Home({super.key, required this.workspaceTable});
 
   @override
   State<Home> createState() => _HomeState();
@@ -13,20 +21,40 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String selectedValue = 'Semua';
 
-  final List<Map<String, dynamic>> workspace = [
-    {"judul": "Workspace A", "status": {"judul": "Inisiasi Workspace"}, "create_at": "2025-01-01"},
-    {"judul": "Workspace B", "status": {"judul": "Menentukan Area"}, "create_at": "2025-01-02"},
-    {"judul": "Workspace C", "status": {"judul": "Pemotretan Pohon"}, "create_at": "2025-01-03"},
-    {"judul": "Workspace D", "status": {"judul": "Table Shannon Wanner"}, "create_at": "2025-01-04"},
-    {"judul": "Workspace E", "status": {"judul": "Inisiasi Workspace"}, "create_at": "2025-01-05"},
-    {"judul": "Workspace F", "status": {"judul": "Menentukan Area"}, "create_at": "2025-01-06"},
-    {"judul": "Workspace G", "status": {"judul": "Pemotretan Pohon"}, "create_at": "2025-01-07"},
-    {"judul": "Workspace H", "status": {"judul": "Table Shannon Wanner"}, "create_at": "2025-01-08"},
-    {"judul": "Workspace I", "status": {"judul": "Inisiasi Workspace"}, "create_at": "2025-01-09"},
-    {"judul": "Workspace J", "status": {"judul": "Menentukan Area"}, "create_at": "2025-01-10"},
-  ];
+  // Declare workspace without initialization
+  late List<Map<String, dynamic>> workspace;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize workspace in initState using widget.workspaceTable
+    workspace = widget.workspaceTable;
+  }
 
   int currentPage = 1, lowerBoundIndex = 0, upperBoundIndex = 4;
+
+  Map<String, dynamic> workspaceData = {};
+
+  Future<void> setWorkspaceData (String workspaceId) async{
+    var response = await ApiService.get('/workspace/detail/${workspaceId}');
+    var responseData = json.decode(response.body);
+
+    workspaceData = responseData["response"];
+  }
+
+  void goToWorkspace(int urutanDibuka, String workspaceId) async {
+    if(workspaceId.isNotEmpty) {
+      await setWorkspaceData(workspaceId);
+    } else {
+      workspaceData = {"id": null, "nama_workspace": ""};
+      WorkspaceService.saveInformasi(workspaceData);
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => WorkspaceMaster(urutanSaatIni: urutanDibuka, workspaceData: workspaceData)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +77,7 @@ class _HomeState extends State<Home> {
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => WorkspaceMaster()),
-                        );
+                        goToWorkspace(1, "");
                       },
                       label: Text("Tambah"), icon: Icon(Icons.add, color: Colors.white),style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -121,7 +146,7 @@ class _HomeState extends State<Home> {
                       return Card(
                         child: ListTile(
                           onTap: () {
-                            //
+                            goToWorkspace(workspace[index]["urutan_status_workspace"], workspace[index]["id"]);
                           },
                           leading: Image.network(
                             'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
@@ -130,12 +155,12 @@ class _HomeState extends State<Home> {
                             fit: BoxFit.cover,
                           ),
                           trailing: const Icon(Icons.more_vert),
-                          title: Text(workspace[index]["judul"] ?? "Tanpa Judul"), // Dynamic Title
+                          title: Text(workspace[index]["nama_workspace"] ?? "Tanpa Judul"), // Dynamic Title
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(workspace[index]["create_at"] ?? "-"), // Dynamic Subtitle 2
-                              Text(workspace[index]["status"]["judul"] ?? "-"), // Dynamic Subtitle 1
+                              Text(FormatTextService.formatDate(workspace[index]["created_at"])), // Dynamic Subtitle 2
+                              Text('${workspace[index]["urutan_status_workspace"]}' ?? "-"), // Dynamic Subtitle 1
                             ],
                           ),
                           tileColor: Colors.white,
@@ -144,13 +169,12 @@ class _HomeState extends State<Home> {
                     },
                   ),
                 ),
-          
-          
+              
+                SizedBox(height: 50),
               ],
             ),
           ),
 
-          // SizedBox(height: 50),
 
           Positioned(
             bottom: 0,
@@ -182,10 +206,6 @@ class _HomeState extends State<Home> {
                   ElevatedButton(
                     onPressed: () {
                       // Add your action here
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => WorkspaceMaster()),
-                      );
                     },
                     child: Icon(Icons.arrow_right, color: AppColors.primary),
                     style: ElevatedButton.styleFrom(

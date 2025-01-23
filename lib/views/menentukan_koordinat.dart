@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:diversitree_mobile/core/styles.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MenentukanKoordinat extends StatefulWidget {
@@ -30,7 +31,41 @@ Map<String, dynamic> koordinat = {
   "kanan_bawah": {"label": "Kanan Bawah", "exist": true, "x": 50.23, "y": 80.42}
 };
 
+Map<String, Color> circleColor = {
+  "kiri_atas": AppColors.tertiary,
+  "kanan_atas": AppColors.tertiary,
+  "kiri_bawah": AppColors.tertiary,
+  "kanan_bawah": AppColors.tertiary,
+};
 class _DashedBorderBoxState extends State<DashedBorderBox> {
+  void updateColor() {
+    setState(() {
+      koordinat.forEach((key, value) {
+        if(key == selected_koordinat) {
+          circleColor[key] = AppColors.secondary;
+        } else {
+          if (value["exist"] == true) {
+            circleColor[key] = AppColors.primary; 
+          } else {
+            circleColor[key] = AppColors.tertiary;
+          }
+        }
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    updateColor();
+
+    // Debug print to check the updated map
+    if (kDebugMode) {
+      print(circleColor);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -62,7 +97,7 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
                     left: entry.key == 'kiri_atas' || entry.key == 'kiri_bawah' ? -8 : null,
                     right: entry.key == 'kanan_atas' || entry.key == 'kanan_bawah' ? -8 : null,
                     bottom: entry.key == 'kiri_bawah' || entry.key == 'kanan_bawah' ? -8 : null,
-                    child: CircleContainer(position: entry.key),
+                    child: CircleContainer(position: entry.key, onTap: () {updateColor();}),
                   ),
               ],
             ),
@@ -72,23 +107,31 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
         SizedBox(height: 32,),
 
         for (var entry in koordinat.entries)
-          Container(
-            padding: EdgeInsets.all(8.0),
-            margin: EdgeInsets.only(bottom: 2.0),
-            width: double.infinity,
-            height: 32,
-            color: AppColors.tertiary,
-            child: GridView(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, // Number of columns
-                crossAxisSpacing: 10.0, // Space between columns
-                mainAxisSpacing: 10.0, // Space between rows
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                selected_koordinat = entry.key;
+              });
+              updateColor();
+            },
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              margin: EdgeInsets.only(bottom: 2.0),
+              width: double.infinity,
+              height: 32,
+              color: circleColor[entry.key],
+              child: GridView(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, // Number of columns
+                  crossAxisSpacing: 10.0, // Space between columns
+                  mainAxisSpacing: 10.0, // Space between rows
+                ),
+                children: [
+                  Text(koordinat[entry.key]['label'], style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text("x: ${koordinat[entry.key]['x']}"),
+                  Text("y: ${koordinat[entry.key]['y']}"),
+                ],
               ),
-              children: [
-                Text(koordinat[entry.key]['label'], style: TextStyle(fontWeight: FontWeight.bold),),
-                Text("x: ${koordinat[entry.key]['x']}"),
-                Text("y: ${koordinat[entry.key]['y']}"),
-              ],
             ),
           ),
 
@@ -129,53 +172,39 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
 
 class CircleContainer extends StatefulWidget {
   final String position;
+  final Function onTap;
 
-  CircleContainer({required this.position});
+  CircleContainer({required this.position, required this.onTap});
 
   @override
   _CircleContainerState createState() => _CircleContainerState();
 }
 
 class _CircleContainerState extends State<CircleContainer> {
-  late Color containerColor;
-
   @override
   void initState() {
     super.initState();
-    _updateColor();
-  }
-
-  void _updateColor() {
-    setState(() {
-      if (selected_koordinat == widget.position) {
-        containerColor = Colors.grey.shade700;
-      } else {
-        if (koordinat[widget.position]["exist"]) {
-          containerColor = AppColors.primary;
-        } else {
-          containerColor = Colors.grey.shade600;
-        }
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print("berhasil");
         setState(() {
           selected_koordinat = widget.position;
-          _updateColor();
         });
+        widget.onTap();
       },
-      child: Container(
-        width: 20, // Circle diameter
-        height: 20, // Circle diameter
-        decoration: BoxDecoration(
-          color: containerColor, // Set the background color based on state
-          shape: BoxShape.circle, // Circular shape
-          border: Border.all(color: Colors.grey.shade900, width: 2.0), // Border for the circle
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          width: 20, // Circle diameter
+          height: 20, // Circle diameter
+          decoration: BoxDecoration(
+            color: circleColor[widget.position], // Set the background color based on state
+            shape: BoxShape.circle, // Circular shape
+            border: Border.all(color: Colors.grey.shade900, width: 2.0), // Border for the circle
+          ),
         ),
       ),
     );

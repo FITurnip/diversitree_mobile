@@ -1,4 +1,4 @@
-import 'package:diversitree_mobile/components/RingkasanInformasi.dart';
+import 'package:diversitree_mobile/components/ringkasan_informasi.dart';
 import 'package:flutter/material.dart';
 
 class ShannonWannerTable extends StatefulWidget {
