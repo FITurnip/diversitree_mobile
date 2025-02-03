@@ -28,11 +28,10 @@ class _CameraScreenState extends State<CameraScreen> {
     // Initialize the CameraController with the selected camera.
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.medium,
+      ResolutionPreset.high,
     );
 
     _initializeControllerFuture = _controller.initialize().then((_) {
-      // Set the zoom level to 1x (no zoom)
       _controller.setZoomLevel(1.0);
     });
   }

@@ -72,13 +72,14 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
             child: StepperButton(
               urutanSaatIni: urutanSaatIni,
               onStepChanged: (urutanTerbaru) async {
-                if(urutanSaatIni == 1) await WorkspaceService.saveInformasi(workspaceData);
-                else if(urutanSaatIni == 2) await WorkspaceService.saveKoordinat(workspaceData);
-
                 if(kDebugMode) {
                   print("WorkspaceMaster: Data will saved ${workspaceData}");
                 }
                 
+                if(urutanSaatIni == 1) await WorkspaceService.saveInformasi(workspaceData);
+                else if(urutanSaatIni == 2) await WorkspaceService.saveKoordinat(workspaceData);
+                else if(urutanSaatIni == 3) await WorkspaceService.saveFinalResult(workspaceData);
+
                 setState(() {
                   urutanSaatIni = urutanTerbaru;
                 });

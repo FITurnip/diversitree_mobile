@@ -1,21 +1,17 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart'; // For kDebugMode
-import 'package:http_parser/http_parser.dart'; 
 
 class ApiService {
   static const _prefixUrl = '192.168.100.36:8000'; // The base URL without protocol
 
+  static const urlStorage = 'http://' + _prefixUrl+ '/storage/';
+
   static Uri _setUri(path) {
     return Uri.http(_prefixUrl, 'api' + path);
   }
-
-  // static const _baseHeader = {
-  //   'Content-Type': 'application/json'
-  // };
 
   // GET request
   static Future<http.Response> get(String path) async {
@@ -40,7 +36,6 @@ class ApiService {
   static Future<http.Response> post(String path, Map<String, dynamic>? body) async {
     var _url = _setUri(path);
 
-    // Print details in debug mode
     if (kDebugMode) {
       print('ApiService: POST Request URL: $_url');
       print('ApiService: Request Body: $body');
@@ -50,134 +45,65 @@ class ApiService {
 
     // Ensure `body` is not null before iterating
     if (body != null) {
-      for (MapEntry<String, dynamic> entry in body.entries) { // ✅ Explicit type for `entry`
-        String key = entry.key;
-        dynamic value = entry.value;
-
-        if (value != null) {
-          if (value is XFile) {
-            // Convert XFile to bytes
-            var bytes = await value.readAsBytes();
-            var multipartFile = http.MultipartFile.fromBytes(
-              key,
-              bytes,
-              filename: basename(value.path),
-            );
-            request.files.add(multipartFile);
-          } else if (value is File) {
-            // Convert File to MultipartFile
-            var fileStream = http.ByteStream(value.openRead());
-            var fileLength = await value.length();
-            var multipartFile = http.MultipartFile(
-              key,
-              fileStream,
-              fileLength,
-              filename: basename(value.path),
-            );
-            request.files.add(multipartFile);
-          } else {
-            // Add regular form fields
-            request.fields[key] = value.toString();
-          }
-        }
-      }
+      _flattenAndAddFields(request, body);
     }
 
     // Send the request
     var response = await request.send();
+    var responseBody = await response.stream.bytesToString();
+
+    // Print response details in debug mode before returning
+    if (kDebugMode) {
+      print('ApiService: Response Status Code: ${response.statusCode}');
+      print('ApiService: Response Body: $responseBody');
+    }
 
     // Handle the response
-    var responseBody = await response.stream.bytesToString();
     return http.Response(responseBody, response.statusCode);
   }
 
-  // POST request
-  // static Future<http.Response> post(String path, Map<String, dynamic>? body) async {
-  //   var _url = _setUri(path);
+  // Recursive function to flatten nested maps
+  static void _flattenAndAddFields(http.MultipartRequest request, Map<String, dynamic> map, [String prefix = '']) {
+    map.forEach((key, value) async {
+      String newKey = prefix.isEmpty ? key : '$prefix[$key]';
 
-  //   // Print details in debug mode
-  //   if (kDebugMode) {
-  //     print('ApiService: POST Request URL: $_url');
-  //     print('ApiService: Request Body: $body');
-  //   }
-
-  //   // Encode the body as x-www-form-urlencoded
-  //   var encodedBody = _encodeBody(body);
-
-  //   var response = await http.post(
-  //     _url,
-  //     headers: _baseHeader,
-  //     body: encodedBody,
-  //   );
-
-  //   // Print the response in debug mode
-  //   if (kDebugMode) {
-  //     print('ApiService: Response Status Code: ${response.statusCode}');
-  //     print('ApiService: Response Body: ${response.body}');
-  //   }
-
-  //   return response;
-  // }
-
-  static String _encodeBody(Map<String, dynamic>? body) {
-    if (body == null || body.isEmpty) return '';
-
-    List<String> encodedParams = [];
-    body.forEach((key, value) {
-      if (value == null) return;
+      if (value == null) {
+        // Skip adding null values to the request
+        return;
+      }
 
       if (value is Map<String, dynamic>) {
-        // If the value is a Map, recurse and flatten it
-        encodedParams.addAll(_encodeNestedMap(key, value));
+        // Recursively flatten nested maps
+        _flattenAndAddFields(request, value, newKey);
+      } else if (value is List) {
+        // Handle List (array)
+        for (int i = 0; i < value.length; i++) {
+          // Flatten each item in the array and append index
+          var item = value[i];
+          String arrayKey = '$newKey[$i]';
+          if (item is Map<String, dynamic>) {
+            // Recursively flatten each object inside the array
+            _flattenAndAddFields(request, item, arrayKey);
+          } else {
+            // Add primitive values directly to fields
+            request.fields[arrayKey] = item.toString();
+          }
+        }
+      } else if (value is File) {
+        // Handle File
+        var fileStream = http.ByteStream(value.openRead());
+        var fileLength = await value.length();
+        var multipartFile = http.MultipartFile(
+          newKey,
+          fileStream,
+          fileLength,
+          filename: basename(value.path),
+        );
+        request.files.add(multipartFile);
       } else {
-        // Encode simple key-value pair
-        encodedParams.add('${Uri.encodeComponent(key)}=${Uri.encodeComponent(value.toString())}');
+        // Handle normal key-value pair
+        request.fields[newKey] = value.toString();
       }
     });
-
-    return encodedParams.join('&');
   }
-
-  static List<String> _encodeNestedMap(String prefix, Map<String, dynamic> map) {
-    List<String> encodedParams = [];
-    map.forEach((key, value) {
-      String newKey = '$prefix[$key]';  // Flatten nested key
-      if (value is Map<String, dynamic>) {
-        // Recurse for nested maps
-        encodedParams.addAll(_encodeNestedMap(newKey, value));
-      } else {
-        // Encode simple key-value pair
-        encodedParams.add('${Uri.encodeComponent(newKey)}=${Uri.encodeComponent(value.toString())}');
-      }
-    });
-    return encodedParams;
-  }
-
-  static const _baseHeader = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-  };
-
-  // static Future<http.Response> post(String path, Map<String, dynamic>? body) async {
-  //   var _url = _setUri(path);
-
-  //   // Print details in debug mode
-  //   if (kDebugMode) {
-  //     print('ApiService: POST Request URL: $_url');
-  //     print('ApiService: Request Body: ${json.encode(body)}');
-  //   }
-
-  //   var response = await http.post(
-  //     _url,
-  //     headers: _baseHeader,
-  //     body: json.encode(body),
-  //   );
-
-  //   // Print the response in debug mode
-  //   if (kDebugMode) {
-  //     print('ApiService: Response Status Code: ${response.statusCode}');
-  //     print('ApiService: Response Body: ${response.body}');
-  //   }
-
-  //   return response;
-  // }
 }

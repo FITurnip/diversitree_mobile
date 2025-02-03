@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:diversitree_mobile/components/ringkasan_informasi.dart';
 import 'package:diversitree_mobile/core/camera_services.dart';
 import 'package:diversitree_mobile/core/styles.dart';
+import 'package:diversitree_mobile/helper/api_service.dart';
 import 'package:flutter/material.dart';
 
 class PemotretanPohon extends StatefulWidget {
@@ -80,6 +81,19 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
     });
   }
 
+  late List<Map<String, dynamic>> listPohon;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    listPohon = widget.workspaceData["pohon"] is List
+      ? (widget.workspaceData["pohon"] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList()
+      : [];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -111,7 +125,7 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
               mainAxisSpacing: 8.0,
               childAspectRatio: 0.65,
             ),
-            itemCount: 0,
+            itemCount: listPohon.length,
             shrinkWrap: true,  // Ensures GridView is sized correctly
             physics: NeverScrollableScrollPhysics(), // Disables internal scroll
             itemBuilder: (context, index) {
@@ -128,7 +142,7 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
                         child: Image.network(
-                          '',
+                          ApiService.urlStorage + listPohon[index]['path_foto'],
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -140,8 +154,8 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Mangifera indica"),
-                          Text("Dbh: 80 m2"),
+                          Text("${listPohon[index]['nama_spesies']}"),
+                          Text("Dbh: ${listPohon[index]['dbh']} m2"),
                         ],
                       ),
                     ),

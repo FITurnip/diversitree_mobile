@@ -40,4 +40,16 @@ class WorkspaceService {
       await updateOnDatabase(workspaceData);
     }
   }
+
+  static Future<void> saveFinalResult(Map<String, dynamic> workspaceData) async {
+    var response = await ApiService.post('/workspace/save-final-result', workspaceData);
+    var responseData = json.decode(response.body);
+
+    if (responseData["response"] is Map) {
+      // Update the workspaceData with the response
+      workspaceData = Map<String, dynamic>.from(responseData["response"]);
+      // Call updateOnDatabase method after getting the response
+      await updateOnDatabase(workspaceData);
+    }
+  }
 }
