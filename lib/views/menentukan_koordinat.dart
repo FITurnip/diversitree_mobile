@@ -7,6 +7,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MenentukanKoordinat extends StatefulWidget {
+  final Map<String, dynamic> workspaceData;
+  MenentukanKoordinat({required this.workspaceData});
+
   @override
   _MenentukanKoordinatState createState() => _MenentukanKoordinatState();
 }
@@ -14,13 +17,16 @@ class MenentukanKoordinat extends StatefulWidget {
 class _MenentukanKoordinatState extends State<MenentukanKoordinat> {
   @override
   Widget build(BuildContext context) {
-    return DashedBorderBox();
+    return DashedBorderBox(workspaceData: widget.workspaceData);
   }
 }
 
 enum CircleState { selected, unselected, filled }
 
 class DashedBorderBox extends StatefulWidget {
+  final Map<String, dynamic> workspaceData;
+  DashedBorderBox({required this.workspaceData});
+
   @override
   _DashedBorderBoxState createState() => _DashedBorderBoxState();
 }
@@ -28,11 +34,18 @@ class DashedBorderBox extends StatefulWidget {
 class _DashedBorderBoxState extends State<DashedBorderBox> {
   String selectedKoordinat = "";
 
+  Map<String, String> labelKoordinat = {
+    "kiri_atas": "Kiri Atas",
+    "kanan_atas": "Kanan Atas",
+    "kiri_bawah": "Kiri Atas",
+    "kanan_bawah": "Kanan Bawah"
+  };
+
   Map<String, dynamic> koordinat = {
-    "kiri_atas": {"label": "Kiri Atas", "x": null as double?, "y": null as double?},
-    "kanan_atas": {"label": "Kanan Atas", "x": null as double?, "y": null as double?},
-    "kiri_bawah": {"label": "Kiri Bawah", "x": null as double?, "y": null as double?},
-    "kanan_bawah": {"label": "Kanan Bawah", "x": null as double?, "y": null as double?}
+    "kiri_atas": {"x": null as double?, "y": null as double?},
+    "kanan_atas": {"x": null as double?, "y": null as double?},
+    "kiri_bawah": {"x": null as double?, "y": null as double?},
+    "kanan_bawah": {"x": null as double?, "y": null as double?}
   };
 
   Map<String, Color> circleColor = {
@@ -116,6 +129,15 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
     }
 
     _checkPermissionsAndStartStream();
+
+    setState(() {
+      if(widget.workspaceData["titik_koordinat"] != null) {
+        koordinat = widget.workspaceData["titik_koordinat"];
+      }
+      widget.workspaceData["titik_koordinat"] = koordinat;
+    });
+
+    // print("hasil akhir:${widget.workspaceData}");
   }
 
   void selectKoordinat(String newSelectedKoordinat) {
@@ -130,13 +152,6 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Center(
-        //   child: Text(
-        //     locationMessage,
-        //     style: TextStyle(fontSize: 18),
-        //     textAlign: TextAlign.center,
-        //   ),
-        // ),
         Center(
           child: Container(
             child: Stack(
@@ -174,9 +189,6 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
         for (var entry in koordinat.entries)
           GestureDetector(
             onTap: () {
-              // setState(() {
-              //   selectedKoordinat = entry.key;
-              // });
               selectKoordinat(entry.key);
               updateColor();
             },
@@ -193,7 +205,7 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
                   mainAxisSpacing: 10.0, // Space between rows
                 ),
                 children: [
-                  Text(koordinat[entry.key]['label'], style: TextStyle(fontWeight: FontWeight.bold),),
+                  Text(labelKoordinat[entry.key]!, style: TextStyle(fontWeight: FontWeight.bold),),
                   Text("x: ${koordinat[entry.key]['x']}"),
                   Text("y: ${koordinat[entry.key]['y']}"),
                 ],

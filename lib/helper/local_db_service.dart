@@ -33,15 +33,29 @@ class LocalDbService {
           print('LocalDbWorkspace: Creating table: workspaces');
         }
 
+        // Create the 'workspaces' table
         await db.execute('''
           CREATE TABLE workspaces (
             id TEXT PRIMARY KEY,
             urutan_status_workspace INTEGER NOT NULL,
-            nama_workspace TEXT NOT NULL,
+            nama_workspace TEXT,
             updated_at TEXT NOT NULL,
             created_at TEXT NOT NULL
           )
         ''');
+
+        // Create the 'photo' table
+        await db.execute('''
+          CREATE TABLE photo (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            workspace_id TEXT NOT NULL,
+            photo_path TEXT NOT NULL,
+            spesies TEXT,
+            diameter REAL,
+            FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+          )
+        ''');
+        
         _isNewTableCreated = true; // Set the flag if the table was created
       },
     );

@@ -2,6 +2,10 @@ import 'package:diversitree_mobile/components/ringkasan_informasi.dart';
 import 'package:flutter/material.dart';
 
 class ShannonWannerTable extends StatefulWidget {
+  final Map<String, dynamic> workspaceData;
+
+  const ShannonWannerTable({required this.workspaceData});
+
   @override
   _ShannonWannerTableState createState() => _ShannonWannerTableState();
 }
@@ -22,7 +26,7 @@ class _ShannonWannerTableState extends State<ShannonWannerTable> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        RingkasanInformasi(infoSize: 56, showCamera: false,),
+        RingkasanInformasi(infoSize: 56, showCamera: false, workspaceData: widget.workspaceData,),
 
         PaginatedDataTable(
             header: Text('Daftar Spesies'),

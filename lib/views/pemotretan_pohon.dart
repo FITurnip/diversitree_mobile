@@ -1,22 +1,84 @@
+import 'dart:convert';
+
+import 'package:camera/camera.dart';
 import 'package:diversitree_mobile/components/ringkasan_informasi.dart';
+import 'package:diversitree_mobile/core/camera_services.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:flutter/material.dart';
 
 class PemotretanPohon extends StatefulWidget {
+  final Map<String, dynamic> workspaceData;
+  PemotretanPohon({required this.workspaceData});
   @override
   _PemotretanPohonState createState() => _PemotretanPohonState();
 }
 
 class _PemotretanPohonState extends State<PemotretanPohon> {
   double infoSize = 56.0;
-  final List<String> images = [
-    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-    'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-  ];
+
+  List<XFile> newCapturedImages = [];
+  bool isSavingNewCapturedImages = false;
+  int savedImages = 0;
+
+  // Method to update progress while saving images
+  Future<void> saveImages() async {
+    Navigator.pop(context);
+    Navigator.pop(context);
+
+    print("saving start here...===============================================================");
+    setState(() {
+      isSavingNewCapturedImages = true;
+      savedImages = 0;
+    });
+
+    // Save images one by one
+    for (int i = 0; i < newCapturedImages.length; i++) {
+      setState(() {
+        savedImages++;
+      });
+
+      print(
+        "${newCapturedImages[i]} ${widget.workspaceData['id']}",
+      );
+
+      await CameraServices.saveCapturedImage(
+        newCapturedImages[i],
+        widget.workspaceData["id"],
+      );
+
+      // var response = await CameraServices.saveCapturedImage(
+      //   newCapturedImages[i],
+      //   widget.workspaceData["id"],
+      // );
+      // var responseData = json.decode(response.body);
+
+      // // Ensure the 'pohon' key exists and is a List
+      // if (widget.workspaceData["pohon"] is List) {
+      //   // Add the decoded response data to the 'pohon' list
+      //   widget.workspaceData["pohon"].add(responseData);
+      // } else {
+      //   // Initialize 'pohon' as a list if it doesn't exist
+      //   widget.workspaceData["pohon"] = [responseData];
+      // }
+
+      // print("newVal: ${widget.workspaceData}");
+
+      // Simulate saving process with a delay (replace with actual saving logic)
+      await Future.delayed(Duration(seconds: 1));
+    }
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("All images saved successfully!"),
+    ));
+
+    
+    setState(() {
+      isSavingNewCapturedImages = false;
+      savedImages = 0;
+      newCapturedImages.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +86,23 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RingkasanInformasi(infoSize: infoSize, showCamera: true,),
+          RingkasanInformasi(infoSize: infoSize, showCamera: true, workspaceData: widget.workspaceData, newCapturedImages: newCapturedImages, saveCapturedImage: () {saveImages();}),
 
           Container(margin: EdgeInsets.only(bottom: 8.0), child: Text('Daftar Pohon', style: AppTextStyles.heading1,)),
+
+          if(isSavingNewCapturedImages) Container(
+            margin: EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              children: [
+                CircularProgressIndicator(), // Progress bar
+                SizedBox(width: 32.0),
+                Text(
+                  'Menyimpan... ${savedImages}/${newCapturedImages.length} foto',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
 
           GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -35,7 +111,7 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
               mainAxisSpacing: 8.0,
               childAspectRatio: 0.65,
             ),
-            itemCount: images.length,
+            itemCount: 0,
             shrinkWrap: true,  // Ensures GridView is sized correctly
             physics: NeverScrollableScrollPhysics(), // Disables internal scroll
             itemBuilder: (context, index) {
@@ -52,7 +128,7 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
                         child: Image.network(
-                          images[index],
+                          '',
                           fit: BoxFit.cover,
                         ),
                       ),

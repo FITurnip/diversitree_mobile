@@ -1,16 +1,29 @@
-
+import 'package:camera/camera.dart';
+import 'package:diversitree_mobile/components/camera_screen.dart';
 import 'package:diversitree_mobile/core/styles.dart';
-import 'package:flutter/material.dart';
 
-class RingkasanInformasi extends StatelessWidget {
+import 'package:flutter/material.dart';
+class RingkasanInformasi extends StatefulWidget {
   const RingkasanInformasi({
     super.key,
     required this.infoSize,
     required this.showCamera,
+    required this.workspaceData,
+    this.newCapturedImages, 
+    this.saveCapturedImage,
   });
 
   final double infoSize;
   final bool showCamera;
+  final Map<String, dynamic> workspaceData;
+  final List<XFile>? newCapturedImages;
+  final Function()? saveCapturedImage;
+
+  @override
+  State<RingkasanInformasi> createState() => _RingkasanInformasiState();
+}
+
+class _RingkasanInformasiState extends State<RingkasanInformasi> {
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +35,7 @@ class RingkasanInformasi extends StatelessWidget {
             fit: FlexFit.loose,
             child: Container(
               width: double.infinity,
-              height: infoSize,
+              height: widget.infoSize,
               decoration: BoxDecoration(
                 color: AppColors.info, // Background color
                 borderRadius: BorderRadius.circular(appBorderRadius), // Border radius
@@ -68,15 +81,41 @@ class RingkasanInformasi extends StatelessWidget {
           ),
       
           // Camera Button
-          if(showCamera)
+          if(widget.showCamera)
           Container(
             margin: EdgeInsets.only(left: 8.0),
             child: OutlinedButton(
-              onPressed: () {
+              onPressed: () async {
+                // Ensure that plugin services are initialized before accessing availableCameras.
+                WidgetsFlutterBinding.ensureInitialized();
+
+                // Get the list of available cameras.
+                final cameras = await availableCameras();
+
+                // Find the back camera.
+                final backCamera = cameras.firstWhere(
+                  (camera) => camera.lensDirection == CameraLensDirection.back,
+                  orElse: () => throw Exception('No back camera found!'),
+                );
+
                 // page route to camera screen
+                print("Navigating to Camera Screen");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CameraScreen(
+                      camera: backCamera,
+                      workspace_id: widget.workspaceData['id'],
+                      newCapturedImages: widget.newCapturedImages ?? [],
+                      saveImages: () {
+                        widget.saveCapturedImage!();
+                      },
+                    ),
+                  ),
+                );
               },
               style: OutlinedButton.styleFrom(
-                fixedSize: Size(infoSize, infoSize), // Set width & height
+                fixedSize: Size(widget.infoSize, widget.infoSize), // Set width & height
                 backgroundColor: AppColors.secondary,
                 iconColor: Colors.white,
                 shape: RoundedRectangleBorder(

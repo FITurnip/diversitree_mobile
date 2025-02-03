@@ -1,15 +1,12 @@
-import 'dart:convert';
-
 import 'package:diversitree_mobile/components/stepper_button.dart';
 import 'package:diversitree_mobile/components/stepper_information.dart';
 import 'package:diversitree_mobile/components/header.dart';
 import 'package:diversitree_mobile/core/workspace_service.dart';
-import 'package:diversitree_mobile/helper/api_service.dart';
-import 'package:diversitree_mobile/helper/local_db_service.dart';
 import 'package:diversitree_mobile/views/pemotretan_pohon.dart';
 import 'package:diversitree_mobile/views/shannon_wanner_table.dart';
 import 'package:diversitree_mobile/views/workspace_init.dart';
 import 'package:diversitree_mobile/views/menentukan_koordinat.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class WorkspaceMaster extends StatefulWidget {
@@ -56,11 +53,11 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
                       if (urutanSaatIni == 1)
                         return WorkspaceInit(workspaceData: workspaceData);
                       else if (urutanSaatIni == 2)
-                        return MenentukanKoordinat();
+                        return MenentukanKoordinat(workspaceData: workspaceData);
                       else if (urutanSaatIni == 3)
-                        return PemotretanPohon();
+                        return PemotretanPohon(workspaceData: workspaceData);
                       else
-                        return ShannonWannerTable();
+                        return ShannonWannerTable(workspaceData: workspaceData);
                     }),
                   ),
                   SizedBox(height: 200,),
@@ -76,6 +73,12 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
               urutanSaatIni: urutanSaatIni,
               onStepChanged: (urutanTerbaru) async {
                 if(urutanSaatIni == 1) await WorkspaceService.saveInformasi(workspaceData);
+                else if(urutanSaatIni == 2) await WorkspaceService.saveKoordinat(workspaceData);
+
+                if(kDebugMode) {
+                  print("WorkspaceMaster: Data will saved ${workspaceData}");
+                }
+                
                 setState(() {
                   urutanSaatIni = urutanTerbaru;
                 });

@@ -1,169 +1,154 @@
-import 'package:camera/camera.dart';
+import 'dart:io';
+
+import 'package:diversitree_mobile/components/camera_gallery.dart';
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:diversitree_mobile/core/styles.dart';
 
-late List<CameraDescription> _cameras;
+class CameraScreen extends StatefulWidget {
+  final List<XFile> newCapturedImages;
+  final CameraDescription camera;
+  final String workspace_id;
+  final Function() saveImages;
 
-/// CameraApp is the Main Application.
-class CameraApp extends StatefulWidget {
-  /// Default Constructor
-  const CameraApp({super.key});
+  CameraScreen({required this.camera, required this.workspace_id, required this.newCapturedImages, required this.saveImages});
 
   @override
-  State<CameraApp> createState() => _CameraAppState();
+  _CameraScreenState createState() => _CameraScreenState();
 }
 
-class _CameraAppState extends State<CameraApp> {
-  late CameraController controller;
+class _CameraScreenState extends State<CameraScreen> {
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+  XFile? lastCapturedImage; // To store the last captured image
 
   @override
   void initState() {
     super.initState();
-    controller = CameraController(_cameras[0], ResolutionPreset.max);
-    controller.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {});
-    }).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            // Handle access errors here.
-            break;
-          default:
-            // Handle other errors here.
-            break;
-        }
-      }
+    // Initialize the CameraController with the selected camera.
+    _controller = CameraController(
+      widget.camera,
+      ResolutionPreset.medium,
+    );
+
+    _initializeControllerFuture = _controller.initialize().then((_) {
+      // Set the zoom level to 1x (no zoom)
+      _controller.setZoomLevel(1.0);
     });
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
+  // Function to capture image
+  Future<void> captureImage() async {
+    try {
+      final image = await _controller.takePicture();
+      setState(() {
+        widget.newCapturedImages.insert(0, image);  // Add the captured image to the list
+        lastCapturedImage = image;  // Update the last captured image
+      });
+      print('Captured Image Path: ${image.path}');
+    } catch (e) {
+      print('Error capturing image: $e');
+    }
+  }
+
+  // Navigate to the gallery page (new route)
+  void openGallery(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CameraGallery(images: widget.newCapturedImages, workspace_id: widget.workspace_id, saveImages: widget.saveImages,),  // Pass captured images to the GalleryPage
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) {
-      return const MaterialApp(
-        home: Center(child: CircularProgressIndicator()),
-      );
-    }
-    return MaterialApp(
-      home: Scaffold(
-        body: Stack(
-          children: [
-            // Camera preview
-            CameraPreview(controller),
+    return Scaffold(
+      body: FutureBuilder<void>(
+        future: _initializeControllerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            // print("i get this fucking shit: ${_controller.value.aspectRatio}");
+            final mediaWidth = MediaQuery.of(context).size.width;
+            final mediaHeight = MediaQuery.of(context).size.height;
 
-            // Bottom buttons
-            Positioned(
-              bottom: 30,
-              left: 20,
-              child: CircleButton(
-                icon: Icons.arrow_back,
-                onPressed: () {
-                  // Handle back button press
-                  Navigator.of(context).pop();
-                },
+            return Center(
+              child: Transform.rotate(
+                angle: 90 * 3.14159265359 / 180, // Rotate by 90 degrees in radians
+                child: Transform.scale(
+                  scale: mediaHeight / mediaWidth,
+                  child: AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio, // Use the camera's aspect ratio
+                    child: CameraPreview(_controller),
+                  ),
+                ),
               ),
+            );
+          } else {
+            // Loading spinner while initializing
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 32.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            FloatingActionButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Icon(Icons.arrow_back, color: AppColors.secondary.withOpacity(0.8)),
+              backgroundColor: AppColors.info.withOpacity(0.8),
+              shape: CircleBorder(),
             ),
-            Positioned(
-              bottom: 30,
-              left: MediaQuery.of(context).size.width / 2 - 35,
-              child: CircleButton(
-                icon: Icons.camera_alt, // Camera icon with black color
-                onPressed: () {
-                  // Placeholder for picture-taking functionality
-                  print("Take picture pressed");
-                },
-                isCircleInCircle: true, // This creates the inner circle effect
+            SizedBox(width: 64),
+            FloatingActionButton(
+              onPressed: () async {
+                // Capture image when the central button is clicked
+                await captureImage();
+              },
+              child: Container(
+                margin: EdgeInsets.all(16.0),
+                // color: Colors.transparent,
+                width: 100.0,  // Set the width of the circle
+                height: 100.0, // Set the height of the circle
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,  // Make the container circular
+                  color: AppColors.secondary,
+                ),
               ),
+              backgroundColor: AppColors.secondary.withOpacity(0.8),
+              shape: CircleBorder(),
             ),
-            Positioned(
-              bottom: 30,
-              right: 20,
-              child: BoxButton(
-                onPressed: () {},
-              ),
+            SizedBox(width: 64),
+            FloatingActionButton(
+              onPressed: () {
+                // Navigate to the gallery page when the photo_library button is pressed
+                openGallery(context);
+              },
+              child: lastCapturedImage == null
+                  ? Icon(Icons.photo_album, color: AppColors.secondary.withOpacity(0.8),)
+                  : ClipOval(
+                      child: Image.file(
+                        File(lastCapturedImage!.path),
+                        width: 50.0,
+                        height: 50.0,
+                        fit: BoxFit.cover, // Make the image cover the button area
+                      ),
+                    ),
+              backgroundColor: AppColors.info.withOpacity(0.8),
+              shape: CircleBorder(),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class CircleButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool isCircleInCircle;
-
-  const CircleButton({
-    Key? key,
-    required this.icon,
-    required this.onPressed,
-    this.isCircleInCircle = false,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: isCircleInCircle ? 80 : 60,
-        height: isCircleInCircle ? 80 : 60,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          border: isCircleInCircle ? Border.all(color: Colors.black, width: 4) : null,
-        ),
-        child: Center(
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black, // Inner circle with black color
-            ),
-            child: Icon(
-              icon,
-              color: Colors.black, // Icon color is now black
-              size: 30,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class BoxButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const BoxButton({
-    Key? key,
-    required this.onPressed,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: const Center(
-          child: Text(
-            "Box",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
         ),
       ),
     );
