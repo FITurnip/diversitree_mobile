@@ -22,10 +22,13 @@ class WorkspaceService {
     var responseData = json.decode(response.body);
 
     if (responseData["response"] is Map) {
-      // Update the workspaceData with the response
-      workspaceData = Map<String, dynamic>.from(responseData["response"]);
+      // Instead of reassigning workspaceData, update its contents
+      workspaceData.clear(); // Clear the original map
+      workspaceData.addAll(Map<String, dynamic>.from(responseData["response"]));
+      
       // Call updateOnDatabase method after getting the response
       await updateOnDatabase(workspaceData);
+      print("Updated Workspace Data: ${workspaceData}");
     }
   }
 

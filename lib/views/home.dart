@@ -5,30 +5,35 @@ import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/core/workspace_service.dart';
 import 'package:diversitree_mobile/helper/api_service.dart';
 import 'package:diversitree_mobile/helper/format_text_service.dart';
+import 'package:diversitree_mobile/helper/local_db_service.dart';
 import 'package:diversitree_mobile/views/workspace_master.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class Home extends StatefulWidget {
   final List<Map<String, dynamic>> workspaceTable;
+  final List<Map<String, dynamic>> statusWorkspaceTable;
 
   // Update the constructor to accept workspaceTable as a parameter
-  const Home({super.key, required this.workspaceTable});
+  const Home({super.key, required this.workspaceTable, required this.statusWorkspaceTable});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  String selectedValue = 'Semua';
+  String ?selectedValue;
 
   // Declare workspace without initialization
   late List<Map<String, dynamic>> workspace;
+  late List<Map<String, dynamic>> statusWorkspace;
 
   @override
   void initState() {
     super.initState();
     // Initialize workspace in initState using widget.workspaceTable
     workspace = widget.workspaceTable;
+    statusWorkspace = widget.statusWorkspaceTable;
   }
 
   int currentPage = 1, lowerBoundIndex = 0, upperBoundIndex = 4;
@@ -43,17 +48,28 @@ class _HomeState extends State<Home> {
   }
 
   void goToWorkspace(int urutanDibuka, String workspaceId) async {
+    // prepare workspaceData
     if(workspaceId.isNotEmpty) {
       await setWorkspaceData(workspaceId);
     } else {
       workspaceData = {"id": null, "nama_workspace": ""};
-      WorkspaceService.saveInformasi(workspaceData);
+      await WorkspaceService.saveInformasi(workspaceData);
+      print("Real Updated Workspace Data: ${workspaceData}");
     }
 
-    Navigator.push(
+    // go to workspace
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => WorkspaceMaster(urutanSaatIni: urutanDibuka, workspaceData: workspaceData)),
     );
+
+    // set new list
+    var tempWorspacesData = await LocalDbService.getAll("workspaces");
+
+    setState(() {
+      workspace.clear();
+      workspace.addAll(tempWorspacesData);
+    });
   }
 
   @override
@@ -90,37 +106,31 @@ class _HomeState extends State<Home> {
                   ],
                 ),
 
-                Text(
-                  'Filter',
-                  style: AppTextStyles.secondaryText,
-                ),
-                SizedBox(height: 20),
-                DropdownButtonFormField<String>(
-                  value: selectedValue,
-                  decoration: InputDecoration(
-                  labelText: "Pilih Status", // Floating label
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Rounded border
-                    ),
-                  ),
-                  items: [
-                    'Semua',
-                    'Inisiasi Workspace',
-                    'Menentukan Area',
-                    'Pemotretan Pohon',
-                    'Table Shannon Wanner'
-                  ].map((option) {
-                    return DropdownMenuItem<String>(
-                      value: option,
-                      child: Text(option),
-                    );
-                  }).toList(),
-                  onChanged: (newValue) {
-                    setState(() {
-                      selectedValue = (newValue ?? "Semua");
-                    });
-                  },
-                ),
+                // Text(
+                //   'Filter',
+                //   style: AppTextStyles.secondaryText,
+                // ),
+                // SizedBox(height: 20),
+                // DropdownButtonFormField<String>(
+                //   value: selectedValue,
+                //   decoration: InputDecoration(
+                //     labelText: "Pilih Status",
+                //     border: OutlineInputBorder(
+                //       borderRadius: BorderRadius.circular(10.0),
+                //     ),
+                //   ),
+                //   items: statusWorkspace.map((status) {
+                //     return DropdownMenuItem<String>(
+                //       value: status['nama_status'],
+                //       child: Text(status['nama_status']),
+                //     );
+                //   }).toList(),
+                //   onChanged: (newValue) {
+                //     setState(() {
+                //       selectedValue = newValue!;
+                //     });
+                //   },
+                // ),
             
                 SizedBox(height: 20),
             
@@ -138,32 +148,101 @@ class _HomeState extends State<Home> {
             
                 Expanded(
                   child: ListView.builder(
-                    shrinkWrap: true, 
+                    shrinkWrap: true,
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     itemCount: workspace.length,
                     itemBuilder: (context, index) {
-                      if(index < lowerBoundIndex || index > upperBoundIndex ) return null;
-                      return Card(
-                        child: ListTile(
+                      if (index < lowerBoundIndex || index > upperBoundIndex) return null;
+
+                      return Slidable(
+                        key: Key(workspace[index]["id"].toString()), // Unique key for sliding
+                        endActionPane: ActionPane(
+                          motion: ScrollMotion(), // Smooth slide animation
+                          children: [
+                            Container(
+                              child: SlidableAction(
+                                onPressed: (context) {
+                                  // deleteWorkspace(workspace[index]["id"]); // Delete on tap
+                                },
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                icon: Icons.delete,
+                                borderRadius: BorderRadius.circular(12),
+                                padding: EdgeInsets.all(0),
+                              ),
+                            ),
+                          ],
+                        ),
+                        child: GestureDetector(
                           onTap: () {
                             goToWorkspace(workspace[index]["urutan_status_workspace"], workspace[index]["id"]);
                           },
-                          leading: Image.network(
-                            'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 1,
+                            margin: EdgeInsets.symmetric(vertical: 4),
+                            child: Padding(
+                              padding: EdgeInsets.all(10),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: LatestCapture(url: workspace[index]["foto_terakhir"] ?? null),
+                                  ),
+                                  SizedBox(width: 12), // Spacing between image and text
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          workspace[index]["nama_workspace"] ?? "Tanpa Judul",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Text(
+                                          FormatTextService.formatDate(workspace[index]["created_at"]),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                        SizedBox(height: 6),
+                                        // Status Badge
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            statusWorkspace.isNotEmpty
+                                                ? statusWorkspace[workspace[index]["urutan_status_workspace"] - 1]["nama_status"] ?? "-"
+                                                : "-",
+                                            style: TextStyle(
+                                              color: AppTextColors.onPrimary,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                          
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 16.0),
+                                    child: Icon(Icons.remove_red_eye),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          trailing: const Icon(Icons.more_vert),
-                          title: Text(workspace[index]["nama_workspace"] ?? "Tanpa Judul"), // Dynamic Title
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(FormatTextService.formatDate(workspace[index]["created_at"])), // Dynamic Subtitle 2
-                              Text('${workspace[index]["urutan_status_workspace"]}' ?? "-"), // Dynamic Subtitle 1
-                            ],
-                          ),
-                          tileColor: Colors.white,
                         ),
                       );
                     },
@@ -220,6 +299,26 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class LatestCapture extends StatelessWidget {
+  final String? url;
+  const LatestCapture({
+    super.key, this.url,
+  });
+  
+  String getUrl() {
+    return url ?? 'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg';
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      getUrl(),
+      width: 64,
+      height: 72,
+      fit: BoxFit.cover,
     );
   }
 }

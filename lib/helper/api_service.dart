@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart'; // For kDebugMode
@@ -7,10 +6,10 @@ import 'package:path/path.dart'; // For kDebugMode
 class ApiService {
   static const _prefixUrl = '192.168.100.36:8000'; // The base URL without protocol
 
-  static const urlStorage = 'http://' + _prefixUrl+ '/storage/';
+  static const urlStorage = 'http://$_prefixUrl/storage/';
 
   static Uri _setUri(path) {
-    return Uri.http(_prefixUrl, 'api' + path);
+    return Uri.http(_prefixUrl, 'api$path');
   }
 
   // GET request

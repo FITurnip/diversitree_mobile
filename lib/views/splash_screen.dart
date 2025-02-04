@@ -13,8 +13,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  bool _isLoading = true;
   List<Map<String, dynamic>> workspaceTable = [];
+  List<Map<String, dynamic>> statusWorkspaceTable = [];
 
   @override
   void initState() {
@@ -23,7 +23,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   setWorkspaceTable() async {
-    await LocalDbService.dropDatabase();
     workspaceTable = await LocalDbService.getAll('workspaces');
     if (workspaceTable.isEmpty) {
       var response = await ApiService.get('/workspace/list');
@@ -68,16 +67,56 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  setStatusWorkspaceTable() async {
+    statusWorkspaceTable = await LocalDbService.getAll('status_workspaces');
+    if (statusWorkspaceTable.isEmpty) {
+      var response = await ApiService.get('/status-workspace/list');
+      
+      // Ensure the response body is valid JSON and is a list
+      if (response.statusCode == 200) {
+        try {
+          var responseData = json.decode(response.body);
+
+          // Check if the response is indeed a List
+          if (responseData["response"] is List) {
+            // Now, we can safely cast it to List<Map<String, dynamic>>
+            statusWorkspaceTable = List<Map<String, dynamic>>.from(responseData["response"]).map((record) {
+              return {
+                "urutan": record["urutan"],
+                "nama_status": record["nama_status"],
+              };
+            }).toList();
+
+            await LocalDbService.insertAll('status_workspaces', statusWorkspaceTable);
+          } else {
+            // Handle the case where the response data is not a list
+            if (kDebugMode) {
+              print('Unexpected response data format: Expected a List.');
+            }
+          }
+        } catch (e) {
+          // Handle JSON decoding errors
+          if (kDebugMode) {
+            print('Error decoding response body: $e');
+          }
+        }
+      } else {
+        // Handle the case where the API request fails
+        if (kDebugMode) {
+          print('API request failed with status code: ${response.statusCode}');
+        }
+      }
+    }
+  }
+
   Future<void> _loadData() async {
-    // await Future.delayed(Duration(seconds: 3));
+    await LocalDbService.dropDatabase();
     await setWorkspaceTable();
-    setState(() {
-      _isLoading = false;
-    });
+    await setStatusWorkspaceTable();
 
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => Home(workspaceTable: workspaceTable)),
+      MaterialPageRoute(builder: (context) => Home(workspaceTable: workspaceTable, statusWorkspaceTable: statusWorkspaceTable)),
     );
   }
 

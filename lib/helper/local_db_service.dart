@@ -44,15 +44,12 @@ class LocalDbService {
           )
         ''');
 
-        // Create the 'photo' table
+        // Create the 'status_workspaces' table
         await db.execute('''
-          CREATE TABLE photo (
+          CREATE TABLE status_workspaces (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            workspace_id TEXT NOT NULL,
-            photo_path TEXT NOT NULL,
-            spesies TEXT,
-            diameter REAL,
-            FOREIGN KEY (workspace_id) REFERENCES workspaces(id)
+            urutan INTEGER NOT NULL,
+            nama_status TEXT NOT NULL
           )
         ''');
         
