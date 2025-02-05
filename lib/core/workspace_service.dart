@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:camera/camera.dart';
 import 'package:diversitree_mobile/helper/api_service.dart';
 import 'package:diversitree_mobile/helper/local_db_service.dart';
 
@@ -16,16 +17,20 @@ class WorkspaceService {
     await LocalDbService.insertOrUpdate('workspaces', workspaceOnDb);
   }
 
+  static void reassignWorkspaceData(workspaceData, responseData) {
+    // Instead of reassigning workspaceData, update its contents
+    workspaceData.clear(); // Clear the original map
+    workspaceData.addAll(Map<String, dynamic>.from(responseData["response"]));
+  }
+
   // Static method to save workspace information
   static Future<void> saveInformasi(Map<String, dynamic> workspaceData) async {
     var response = await ApiService.post('/workspace/save-informasi', workspaceData);
     var responseData = json.decode(response.body);
 
     if (responseData["response"] is Map) {
-      // Instead of reassigning workspaceData, update its contents
-      workspaceData.clear(); // Clear the original map
-      workspaceData.addAll(Map<String, dynamic>.from(responseData["response"]));
-      
+      reassignWorkspaceData(workspaceData, responseData);
+
       // Call updateOnDatabase method after getting the response
       await updateOnDatabase(workspaceData);
       print("Updated Workspace Data: ${workspaceData}");
@@ -37,8 +42,8 @@ class WorkspaceService {
     var responseData = json.decode(response.body);
 
     if (responseData["response"] is Map) {
-      // Update the workspaceData with the response
-      workspaceData = Map<String, dynamic>.from(responseData["response"]);
+      reassignWorkspaceData(workspaceData, responseData);
+      
       // Call updateOnDatabase method after getting the response
       await updateOnDatabase(workspaceData);
     }
@@ -49,8 +54,22 @@ class WorkspaceService {
     var responseData = json.decode(response.body);
 
     if (responseData["response"] is Map) {
-      // Update the workspaceData with the response
-      workspaceData = Map<String, dynamic>.from(responseData["response"]);
+      reassignWorkspaceData(workspaceData, responseData);
+      
+      // Call updateOnDatabase method after getting the response
+      await updateOnDatabase(workspaceData);
+    }
+  }
+
+  static Future<void> saveCapturedImage(Map<String, dynamic> workspaceData, XFile image, String workspace_id) async {
+    var response = await ApiService.post("/workspace/save-pohon", {
+      "foto": image,
+      "id": workspace_id,
+    });var responseData = json.decode(response.body);
+
+    if (responseData["response"] is Map) {
+      reassignWorkspaceData(workspaceData, responseData);
+      
       // Call updateOnDatabase method after getting the response
       await updateOnDatabase(workspaceData);
     }

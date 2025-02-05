@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:diversitree_mobile/components/ringkasan_informasi.dart';
-import 'package:diversitree_mobile/core/camera_services.dart';
+import 'package:diversitree_mobile/core/camera_service.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/helper/api_service.dart';
 import 'package:flutter/material.dart';
@@ -16,69 +17,75 @@ class PemotretanPohon extends StatefulWidget {
 
 class _PemotretanPohonState extends State<PemotretanPohon> {
   double infoSize = 56.0;
-
   List<XFile> newCapturedImages = [];
-  bool isSavingNewCapturedImages = false;
-  int savedImages = 0;
 
   // Method to update progress while saving images
+  Completer<void>? _savingCompleter;
   Future<void> saveImages() async {
-    Navigator.pop(context);
-    Navigator.pop(context);
+    print("berjalan ${_savingCompleter}");
+    if (_savingCompleter != null && !_savingCompleter!.isCompleted) {
+      CameraService.newCapturedImagesLength += newCapturedImages.length;
+      List<XFile> tempImages = List.from(newCapturedImages);
+      newCapturedImages.clear();
+      CameraService.newCapturedImages.addAll(tempImages);
 
-    print("saving start here...===============================================================");
-    setState(() {
-      isSavingNewCapturedImages = true;
-      savedImages = 0;
-    });
+      Navigator.pop(context);
+      Navigator.pop(context);
 
-    // Save images one by one
-    for (int i = 0; i < newCapturedImages.length; i++) {
-      setState(() {
-        savedImages++;
-      });
-
-      print(
-        "${newCapturedImages[i]} ${widget.workspaceData['id']}",
-      );
-
-      await CameraServices.saveCapturedImage(
-        newCapturedImages[i],
-        widget.workspaceData["id"],
-      );
-
-      // var response = await CameraServices.saveCapturedImage(
-      //   newCapturedImages[i],
-      //   widget.workspaceData["id"],
-      // );
-      // var responseData = json.decode(response.body);
-
-      // // Ensure the 'pohon' key exists and is a List
-      // if (widget.workspaceData["pohon"] is List) {
-      //   // Add the decoded response data to the 'pohon' list
-      //   widget.workspaceData["pohon"].add(responseData);
-      // } else {
-      //   // Initialize 'pohon' as a list if it doesn't exist
-      //   widget.workspaceData["pohon"] = [responseData];
-      // }
-
-      // print("newVal: ${widget.workspaceData}");
-
-      // Simulate saving process with a delay (replace with actual saving logic)
-      await Future.delayed(Duration(seconds: 1));
+      return _savingCompleter!.future;
     }
 
-    // Show success message
+    _savingCompleter = Completer<void>();
+
+    Navigator.pop(context);
+    Navigator.pop(context);
+
+    CameraService.newCapturedImagesLength += newCapturedImages.length;
+    List<XFile> tempImages = List.from(newCapturedImages);
+    newCapturedImages.clear();
+    CameraService.newCapturedImages.addAll(tempImages);
+
+    setState(() {
+      CameraService.isSavingNewCapturedImages = true;
+      CameraService.savedImages = 0;
+    });
+
+    while (CameraService.newCapturedImages.isNotEmpty) {
+      var image = CameraService.newCapturedImages.removeAt(0);;
+      
+      await CameraService.saveCapturedImage(widget.workspaceData, image, widget.workspaceData["id"]);
+      
+      setState(() {
+        CameraService.savedImages++;
+        listPohon = widget.workspaceData["pohon"] is List
+          ? (widget.workspaceData["pohon"] as List)
+              .map((e) => e as Map<String, dynamic>)
+              .toList()
+          : [];
+        
+      });
+
+      await Future.delayed(Duration(seconds: 1)); // Optional delay per image
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text("All images saved successfully!"),
     ));
 
-    
     setState(() {
-      isSavingNewCapturedImages = false;
-      savedImages = 0;
-      newCapturedImages.clear();
+      CameraService.isSavingNewCapturedImages = false;
+      CameraService.savedImages = 0;
+      CameraService.newCapturedImagesLength = 0;
+
+      listPohon = widget.workspaceData["pohon"] is List
+        ? (widget.workspaceData["pohon"] as List)
+            .map((e) => e as Map<String, dynamic>)
+            .toList()
+        : [];
     });
+
+    _savingCompleter?.complete();
+    _savingCompleter = null;
   }
 
   late List<Map<String, dynamic>> listPohon;
@@ -100,18 +107,25 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RingkasanInformasi(infoSize: infoSize, showCamera: true, workspaceData: widget.workspaceData, newCapturedImages: newCapturedImages, saveCapturedImage: () {saveImages();}),
+          RingkasanInformasi(
+            infoSize: infoSize,
+            showCamera: true,
+            workspaceData: widget.workspaceData,
+            newCapturedImages: newCapturedImages,
+            saveCapturedImage: () {
+              saveImages();
+            }),
 
           Container(margin: EdgeInsets.only(bottom: 8.0), child: Text('Daftar Pohon', style: AppTextStyles.heading1,)),
 
-          if(isSavingNewCapturedImages) Container(
+          if(CameraService.isSavingNewCapturedImages) Container(
             margin: EdgeInsets.only(bottom: 8.0),
             child: Row(
               children: [
                 CircularProgressIndicator(), // Progress bar
                 SizedBox(width: 32.0),
                 Text(
-                  'Menyimpan... ${savedImages}/${newCapturedImages.length} foto',
+                  'Menyimpan... ${CameraService.savedImages}/${CameraService.newCapturedImagesLength} foto',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],

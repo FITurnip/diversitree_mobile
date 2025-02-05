@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart'; // For kDebugMode
@@ -67,30 +68,24 @@ class ApiService {
       String newKey = prefix.isEmpty ? key : '$prefix[$key]';
 
       if (value == null) {
-        // Skip adding null values to the request
         return;
       }
 
       if (value is Map<String, dynamic>) {
-        // Recursively flatten nested maps
         _flattenAndAddFields(request, value, newKey);
       } else if (value is List) {
-        // Handle List (array)
         for (int i = 0; i < value.length; i++) {
-          // Flatten each item in the array and append index
           var item = value[i];
           String arrayKey = '$newKey[$i]';
           if (item is Map<String, dynamic>) {
-            // Recursively flatten each object inside the array
             _flattenAndAddFields(request, item, arrayKey);
           } else {
-            // Add primitive values directly to fields
             request.fields[arrayKey] = item.toString();
           }
         }
-      } else if (value is File) {
-        // Handle File
-        var fileStream = http.ByteStream(value.openRead());
+      } else if (value is File || value is XFile) {
+        // Handle both File and XFile
+        var fileStream = http.ByteStream((value as dynamic).openRead());
         var fileLength = await value.length();
         var multipartFile = http.MultipartFile(
           newKey,
@@ -100,7 +95,6 @@ class ApiService {
         );
         request.files.add(multipartFile);
       } else {
-        // Handle normal key-value pair
         request.fields[newKey] = value.toString();
       }
     });
