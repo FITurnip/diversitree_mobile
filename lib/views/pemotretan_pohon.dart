@@ -19,31 +19,43 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
   double infoSize = 56.0;
   List<XFile> newCapturedImages = [];
 
+  void backFromCameraGallery() {
+    Navigator.pop(context);
+    Navigator.pop(context);
+  }
+
+  void moveNewCapturedImage() {
+    CameraService.newCapturedImagesLength += newCapturedImages.length;
+    List<XFile> tempImages = List.from(newCapturedImages);
+    newCapturedImages.clear();
+    CameraService.newCapturedImages.addAll(tempImages);
+  }
+
+  late List<Map<String, dynamic>> listPohon;
+  void reassignListPohon() {
+    listPohon = widget.workspaceData["pohon"] is List
+      ? (widget.workspaceData["pohon"] as List)
+          .map((e) => e as Map<String, dynamic>)
+          .toList()
+      : [];
+  }
+
   // Method to update progress while saving images
   Completer<void>? _savingCompleter;
   Future<void> saveImages() async {
     print("berjalan ${_savingCompleter}");
     if (_savingCompleter != null && !_savingCompleter!.isCompleted) {
-      CameraService.newCapturedImagesLength += newCapturedImages.length;
-      List<XFile> tempImages = List.from(newCapturedImages);
-      newCapturedImages.clear();
-      CameraService.newCapturedImages.addAll(tempImages);
-
-      Navigator.pop(context);
-      Navigator.pop(context);
+      moveNewCapturedImage();      
+      backFromCameraGallery();
 
       return _savingCompleter!.future;
     }
 
     _savingCompleter = Completer<void>();
 
-    Navigator.pop(context);
-    Navigator.pop(context);
+    backFromCameraGallery();
 
-    CameraService.newCapturedImagesLength += newCapturedImages.length;
-    List<XFile> tempImages = List.from(newCapturedImages);
-    newCapturedImages.clear();
-    CameraService.newCapturedImages.addAll(tempImages);
+    moveNewCapturedImage();
 
     setState(() {
       CameraService.isSavingNewCapturedImages = true;
@@ -57,19 +69,14 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
       
       setState(() {
         CameraService.savedImages++;
-        listPohon = widget.workspaceData["pohon"] is List
-          ? (widget.workspaceData["pohon"] as List)
-              .map((e) => e as Map<String, dynamic>)
-              .toList()
-          : [];
-        
+        reassignListPohon();
       });
 
       await Future.delayed(Duration(seconds: 1)); // Optional delay per image
     }
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("All images saved successfully!"),
+      content: Text("Semua foto telah disimpan!"),
     ));
 
     setState(() {
@@ -77,28 +84,18 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
       CameraService.savedImages = 0;
       CameraService.newCapturedImagesLength = 0;
 
-      listPohon = widget.workspaceData["pohon"] is List
-        ? (widget.workspaceData["pohon"] as List)
-            .map((e) => e as Map<String, dynamic>)
-            .toList()
-        : [];
+      reassignListPohon();
     });
 
     _savingCompleter?.complete();
     _savingCompleter = null;
   }
 
-  late List<Map<String, dynamic>> listPohon;
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    listPohon = widget.workspaceData["pohon"] is List
-      ? (widget.workspaceData["pohon"] as List)
-          .map((e) => e as Map<String, dynamic>)
-          .toList()
-      : [];
+    reassignListPohon();
   }
 
   @override
@@ -133,66 +130,68 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
           ),
 
           GridView.builder(
+            shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-              childAspectRatio: 0.65,
+              crossAxisCount: 2, // 2 columns
+              childAspectRatio: 0.7, // Adjust this ratio to fit content properly
             ),
+            physics: NeverScrollableScrollPhysics(),
             itemCount: listPohon.length,
-            shrinkWrap: true,  // Ensures GridView is sized correctly
-            physics: NeverScrollableScrollPhysics(), // Disables internal scroll
             itemBuilder: (context, index) {
-              return Card(
-                // color: AppColors.tertiary,
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+              return GestureDetector(
+                onTap: () {
+                  //
+                },
+                child: Card(
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                         child: Image.network(
                           ApiService.urlStorage + listPohon[index]['path_foto'],
+                          width: double.infinity, // Make image take full width of its parent
+                          height: 260, // Adjust height as needed
                           fit: BoxFit.cover,
                         ),
                       ),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("${listPohon[index]['nama_spesies']}"),
-                          Text("Dbh: ${listPohon[index]['dbh']} m2"),
-                        ],
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.8),
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Text("${listPohon[index]['nama_spesies'] ?? '-' }",
+                                style: TextStyle(
+                                  color: AppTextColors.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                              Text("${listPohon[index]['dbh']} m²",
+                                style: TextStyle(
+                                  color: AppTextColors.onPrimary,
+                                  fontSize: 8,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        margin: EdgeInsets.only(right: 8.0, bottom: 8.0),
-                        decoration: BoxDecoration(
-                          color: AppColors.info,  // Set the static background color here
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.visibility, color: Colors.white,),  // Use visibility icon for 'view'
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Button pressed for item $index')),
-                            );
-                          },
-                        ),
-                      )
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             },

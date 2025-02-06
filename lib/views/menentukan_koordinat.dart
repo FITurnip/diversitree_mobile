@@ -146,12 +146,21 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
     });
   }
 
+  void _onSectionTap(String sectionKey) {
+    print("clicked ${sectionKey}");
+    // Handle section tap logic here
+    selectKoordinat(sectionKey);
+    updateColor();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: 16,),
+
         Center(
           child: Container(
             child: Stack(
@@ -177,12 +186,76 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
                     left: entry.key == 'kiri_atas' || entry.key == 'kiri_bawah' ? -8 : null,
                     right: entry.key == 'kanan_atas' || entry.key == 'kanan_bawah' ? -8 : null,
                     bottom: entry.key == 'kiri_bawah' || entry.key == 'kanan_bawah' ? -8 : null,
-                    child: CircleContainer(position: entry.key, onTap: () {updateColor();}, selectKoordinat: (newSelectedKoordinat) {selectKoordinat(newSelectedKoordinat);}, circleColor: circleColor),
+                    child: CircleContainer(
+                      position: entry.key,
+                      circleColor: circleColor,
+                      isChecked: koordinat[entry.key]['x'] != null,
+                    ),
                   ),
+                
+
+                // Clickable areas divided into four sections
+                Positioned.fill(
+                  child: Row(
+                    children: [
+                      // Left half
+                      Expanded(
+                        child: Column(
+                          children: [
+                            // Top-left clickable area (fixed size of 50x50)
+                            GestureDetector(
+                              onTap: () => _onSectionTap('kiri_atas'),
+                              child: Container(
+                                width: 50, // Fixed size
+                                height: 50, // Fixed size
+                                color: Colors.transparent, // Invisible container for tapping
+                              ),
+                            ),
+                            // Bottom-left clickable area (fixed size of 50x50)
+                            GestureDetector(
+                              onTap: () => _onSectionTap('kiri_bawah'),
+                              child: Container(
+                                width: 50, // Fixed size
+                                height: 50, // Fixed size
+                                color: Colors.transparent, // Invisible container for tapping
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Right half
+                      Expanded(
+                        child: Column(
+                          children: [
+                            // Top-right clickable area (fixed size of 50x50)
+                            GestureDetector(
+                              onTap: () => _onSectionTap('kanan_atas'),
+                              child: Container(
+                                width: 50, // Fixed size
+                                height: 50, // Fixed size
+                                color: Colors.transparent, // Invisible container for tapping
+                              ),
+                            ),
+                            // Bottom-right clickable area (fixed size of 50x50)
+                            GestureDetector(
+                              onTap: () => _onSectionTap('kanan_bawah'),
+                              child: Container(
+                                width: 50, // Fixed size
+                                height: 50, // Fixed size
+                                color: Colors.transparent, // Invisible container for tapping
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
+
 
         SizedBox(height: 32,),
 
@@ -193,47 +266,88 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
               updateColor();
             },
             child: Container(
-              padding: EdgeInsets.all(8.0),
-              margin: EdgeInsets.only(bottom: 2.0),
+              padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
+              margin: EdgeInsets.symmetric(vertical: 4.0),
               width: double.infinity,
-              height: 32,
-              color: circleColor[entry.key],
-              child: GridView(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // Number of columns
-                  crossAxisSpacing: 10.0, // Space between columns
-                  mainAxisSpacing: 10.0, // Space between rows
-                ),
+              height: 28,
+              decoration: BoxDecoration(
+                color: circleColor[entry.key], // Background color
+                borderRadius: BorderRadius.circular(8.0), // Rounded corners
+              ),
+              child: Row(
                 children: [
-                  Text(labelKoordinat[entry.key]!, style: TextStyle(fontWeight: FontWeight.bold),),
-                  Text("x: ${koordinat[entry.key]['x']}"),
-                  Text("y: ${koordinat[entry.key]['y']}"),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: koordinat[entry.key]['x'] == null 
+                      ? Icon(Icons.check_box_outline_blank, color: Colors.white, size: 10)
+                      : Icon(Icons.check_box, color: Colors.white, size: 10),
+                  ),
+                  Expanded(
+                    child: Text(
+                      labelKoordinat[entry.key]!,
+                      style: TextStyle(fontWeight: FontWeight.bold, color: circleColor[entry.key] == AppColors.primary ? AppTextColors.onPrimary : AppTextColors.onTertiary, fontSize: 12),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      "x: ${koordinat[entry.key]['x']}",
+                      style: TextStyle(color: circleColor[entry.key] == AppColors.primary ? AppTextColors.onPrimary : AppTextColors.onTertiary, fontSize: 12),
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      "y: ${koordinat[entry.key]['y']}",
+                      style: TextStyle(color: circleColor[entry.key] == AppColors.primary ? AppTextColors.onPrimary : AppTextColors.onTertiary, fontSize: 12),
+                    ),
+                  ),
                 ],
               ),
             ),
+
           ),
 
-        Container(
+        latitudePosition != null ? Container(
           padding: EdgeInsets.all(8.0),
-          margin: EdgeInsets.symmetric(vertical: 8.0),
+          margin: EdgeInsets.only(top: 16.0, bottom: 8.0),
           width: double.infinity,
           height: 32,
-          color: AppColors.info,
-          child: GridView(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3, // Number of columns
-              crossAxisSpacing: 10.0, // Space between columns
-              mainAxisSpacing: 10.0, // Space between rows
-            ),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(8.0), // Rounded corners
+          ),
+          child: Row(
             children: [
-              Text("Terkini", style: TextStyle(fontWeight: FontWeight.bold, color: AppTextColors.onInfo),),
-              Text("x: ${latitudePosition}", style: TextStyle(color: AppTextColors.onInfo)),
-              Text("y: ${longitudePosition}", style: TextStyle(color: AppTextColors.onInfo)),
+              Expanded(
+                child: Text(
+                  "Terkini",
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppTextColors.onPrimary, fontSize: 12),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  "x: ${latitudePosition}",
+                  style: TextStyle(color: AppTextColors.onPrimary, fontSize: 12),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  "y: ${longitudePosition}",
+                  style: TextStyle(color: AppTextColors.onPrimary, fontSize: 12),
+                ),
+              ),
             ],
           ),
+        )
+        : Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+              ),
+            ),
         ),
 
-        Align(
+        latitudePosition != null ? Align(
           alignment: Alignment.centerRight,
           child: ElevatedButton.icon(
             onPressed: () {
@@ -243,10 +357,17 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
                 koordinat[selectedKoordinat]?['y'] = longitudePosition;
               });
             },
-            icon: Icon(Icons.location_on), // Location icon
-            label: Text('Tandai Lokasi'),
+            icon: Icon(Icons.location_on, color: Colors.white), // Location icon with white color
+            label: Text('Tandai Lokasi', style: TextStyle(color: Colors.white)), // White text for contrast
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary, // Set button color to primary
+              foregroundColor: Colors.white, // Ensures text/icon color remains visible
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8), // Rounded corners
+              ),
+            ),
           ),
-        )
+        ) : SizedBox.shrink()
       ],
     );
   }
@@ -254,41 +375,43 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
 
 class CircleContainer extends StatefulWidget {
   final String position;
-  final Function(String) selectKoordinat;
-  final Function onTap;
   final Map<String, Color> circleColor;
+  final bool isChecked; // This will be the initial value for the checked state
 
-  CircleContainer({required this.position, required this.onTap, required this.selectKoordinat, required this.circleColor});
+  CircleContainer({
+    required this.position,
+    required this.circleColor,
+    required this.isChecked,
+  });
 
   @override
   _CircleContainerState createState() => _CircleContainerState();
 }
 
 class _CircleContainerState extends State<CircleContainer> {
-  late String selectedKoordinat;
+  late bool _isChecked;
+
   @override
   void initState() {
     super.initState();
+    // Initialize the checked state from the widget's initial value
+    _isChecked = widget.isChecked;
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        widget.selectKoordinat(widget.position);
-        widget.onTap();
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(2.0),
-        child: Container(
-          width: 20, // Circle diameter
-          height: 20, // Circle diameter
-          decoration: BoxDecoration(
-            color: widget.circleColor[widget.position], // Set the background color based on state
-            shape: BoxShape.circle, // Circular shape
-            border: Border.all(color: Colors.grey.shade900, width: 2.0), // Border for the circle
-          ),
+    return Padding(
+      padding: const EdgeInsets.all(2.0),
+      child: Container(
+        width: 20, // Circle diameter
+        height: 20, // Circle diameter
+        decoration: BoxDecoration(
+          color: widget.circleColor[widget.position], // Set the background color based on state
+          shape: BoxShape.circle, // Circular shape
         ),
+        child: _isChecked
+            ? Icon(Icons.check, color: Colors.white, size: 10)
+            : null,
       ),
     );
   }
@@ -298,7 +421,7 @@ class DashedBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = Colors.black // Border color
+      ..color = AppColors.secondary // Border color
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 

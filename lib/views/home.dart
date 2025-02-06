@@ -8,7 +8,6 @@ import 'package:diversitree_mobile/helper/format_text_service.dart';
 import 'package:diversitree_mobile/helper/local_db_service.dart';
 import 'package:diversitree_mobile/views/workspace_master.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 class Home extends StatefulWidget {
   final List<Map<String, dynamic>> workspaceTable;
@@ -36,8 +35,6 @@ class _HomeState extends State<Home> {
     statusWorkspace = widget.statusWorkspaceTable;
   }
 
-  int currentPage = 1, lowerBoundIndex = 0, upperBoundIndex = 4;
-
   Map<String, dynamic> workspaceData = {};
 
   Future<void> setWorkspaceData (String workspaceId) async{
@@ -60,7 +57,8 @@ class _HomeState extends State<Home> {
     // go to workspace
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => WorkspaceMaster(urutanSaatIni: urutanDibuka, workspaceData: workspaceData)),
+      MaterialPageRoute(
+        builder: (context) => WorkspaceMaster(urutanSaatIni: urutanDibuka, workspaceData: workspaceData)),
     );
 
     // set new list
@@ -76,6 +74,44 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: header(),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF08CB4A), // Lighter green
+                    Color(0xFF046525), // Darker green
+                  ],
+                  begin: Alignment.topLeft, // Gradient starts from the top-left
+                  end: Alignment.bottomRight, // Gradient ends at the bottom-right
+                ),
+              ),
+              child: Text(
+                'Menu',  // Title for the drawer
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+            ),
+            SizedBox(height: 24),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Pengguna'),
+            ),
+            SizedBox(height: 4),
+            ListTile(
+              leading: Icon(Icons.exit_to_app),
+              title: Text('Keluar'),
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Padding(
@@ -84,220 +120,133 @@ class _HomeState extends State<Home> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Workspace',
-                      style: AppTextStyles.heading1
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        goToWorkspace(1, "");
-                      },
-                      label: Text("Tambah"), icon: Icon(Icons.add, color: Colors.white),style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white
-                    ),)
-                  ],
-                ),
-
-                // Text(
-                //   'Filter',
-                //   style: AppTextStyles.secondaryText,
-                // ),
-                // SizedBox(height: 20),
-                // DropdownButtonFormField<String>(
-                //   value: selectedValue,
-                //   decoration: InputDecoration(
-                //     labelText: "Pilih Status",
-                //     border: OutlineInputBorder(
-                //       borderRadius: BorderRadius.circular(10.0),
-                //     ),
-                //   ),
-                //   items: statusWorkspace.map((status) {
-                //     return DropdownMenuItem<String>(
-                //       value: status['nama_status'],
-                //       child: Text(status['nama_status']),
-                //     );
-                //   }).toList(),
-                //   onChanged: (newValue) {
-                //     setState(() {
-                //       selectedValue = newValue!;
-                //     });
-                //   },
-                // ),
-            
                 SizedBox(height: 20),
             
                 TextField(
                   decoration: InputDecoration(
-                    labelText: "Cari", // Floating label
+                    labelText: "Cari workspace", // Floating label
                     suffixIcon: Icon(Icons.search), // Search icon
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Rounded border
+                      borderRadius: BorderRadius.circular(8.0), // Rounded border
                     ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primary), // Border color when not focused
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide(color: AppColors.primary), // Border color when focused
+                    ),
+                    suffixIconColor: AppColors.primary,
+                    labelStyle: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 14,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
                   ),
                 ),
-            
+
                 SizedBox(height: 20),
             
                 Expanded(
-                  child: ListView.builder(
+                  child: GridView.builder(
                     shrinkWrap: true,
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // 2 columns
+                      childAspectRatio: 0.7, // Adjust this ratio to fit content properly
+                    ),
                     itemCount: workspace.length,
                     itemBuilder: (context, index) {
-                      if (index < lowerBoundIndex || index > upperBoundIndex) return null;
-
-                      return Slidable(
-                        key: Key(workspace[index]["id"].toString()), // Unique key for sliding
-                        endActionPane: ActionPane(
-                          motion: ScrollMotion(), // Smooth slide animation
-                          children: [
-                            Container(
-                              child: SlidableAction(
-                                onPressed: (context) {
-                                  // deleteWorkspace(workspace[index]["id"]); // Delete on tap
-                                },
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white,
-                                icon: Icons.delete,
-                                borderRadius: BorderRadius.circular(12),
-                                padding: EdgeInsets.all(0),
+                      return GestureDetector(
+                        onTap: () {
+                          goToWorkspace(workspace[index]["urutan_status_workspace"], workspace[index]["id"]);
+                        },
+                        child: Card(
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Stack(
+                            children: [
+                              LatestCapture(
+                                url: workspace[index]["foto_terakhir"] ?? null,
                               ),
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            goToWorkspace(workspace[index]["urutan_status_workspace"], workspace[index]["id"]);
-                          },
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 1,
-                            margin: EdgeInsets.symmetric(vertical: 4),
-                            child: Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  ClipRRect(
+                              Positioned(
+                                top: 8,
+                                left: 8,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.6),
                                     borderRadius: BorderRadius.circular(8),
-                                    child: LatestCapture(url: workspace[index]["foto_terakhir"] ?? null),
                                   ),
-                                  SizedBox(width: 12), // Spacing between image and text
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          workspace[index]["nama_workspace"] ?? "Tanpa Judul",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          FormatTextService.formatDate(workspace[index]["created_at"]),
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                        SizedBox(height: 6),
-                                        // Status Badge
-                                        Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary,
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Text(
-                                            statusWorkspace.isNotEmpty
-                                                ? statusWorkspace[workspace[index]["urutan_status_workspace"] - 1]["nama_status"] ?? "-"
-                                                : "-",
-                                            style: TextStyle(
-                                              color: AppTextColors.onPrimary,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 10,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                  child: Text(
+                                    statusWorkspace.isNotEmpty
+                                        ? statusWorkspace[workspace[index]["urutan_status_workspace"] - 1]["nama_status"] ?? "-"
+                                        : "-",
+                                    style: TextStyle(
+                                      color: AppTextColors.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 8,
                                     ),
                                   ),
-                          
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 16.0),
-                                    child: Icon(Icons.remove_red_eye),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.8),
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(8),
+                                      bottomRight: Radius.circular(8),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        FormatTextService.formatDate(workspace[index]["created_at"]),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        workspace[index]["nama_workspace"] ?? "Tanpa Judul",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Colors.white,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );
                     },
                   ),
                 ),
-              
-                SizedBox(height: 50),
               ],
             ),
           ),
-
-
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add your action here
-                    },
-                    child: Icon(Icons.arrow_left, color: AppColors.primary),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    '${lowerBoundIndex + 1}-${upperBoundIndex + 1} dari ${workspace.length}',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add your action here
-                    },
-                    child: Icon(Icons.arrow_right, color: AppColors.primary),
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            ),
-          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          goToWorkspace(1, "");
+        },
+        backgroundColor: AppColors.primary,
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }
@@ -308,17 +257,21 @@ class LatestCapture extends StatelessWidget {
   const LatestCapture({
     super.key, this.url,
   });
-  
+
   String getUrl() {
     return url ?? 'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg';
   }
+
   @override
   Widget build(BuildContext context) {
-    return Image.network(
-      getUrl(),
-      width: 64,
-      height: 72,
-      fit: BoxFit.cover,
+    return ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+      child: Image.network(
+        getUrl(),
+        width: double.infinity, // Make image take full width of its parent
+        height: 260, // Adjust height as needed
+        fit: BoxFit.cover,
+      ),
     );
   }
 }

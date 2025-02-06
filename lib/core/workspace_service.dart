@@ -33,7 +33,6 @@ class WorkspaceService {
 
       // Call updateOnDatabase method after getting the response
       await updateOnDatabase(workspaceData);
-      print("Updated Workspace Data: ${workspaceData}");
     }
   }
 

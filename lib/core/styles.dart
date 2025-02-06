@@ -28,39 +28,39 @@ class AppTextColors {
 class AppTextStyles {
   // Headings (Optimized for Android)
   static const TextStyle heading1 = TextStyle(
-    fontSize: 24, 
+    fontSize: 20, 
     fontWeight: FontWeight.bold,
     color: AppTextColors.primaryText, 
   );
 
   static const TextStyle heading2 = TextStyle(
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: FontWeight.bold,
     color: AppTextColors.primaryText,
   );
 
   static const TextStyle heading3 = TextStyle(
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppTextColors.primaryText,
   );
 
   static const TextStyle heading4 = TextStyle(
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: FontWeight.w600,
     color: AppTextColors.primaryText,
   );
 
   // Paragraphs
   static const TextStyle paragraph = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: FontWeight.normal,
     color: Color(0xFF424242), // Slightly lighter dark gray
     height: 1.5,
   );
 
   static const TextStyle paragraphSmall = TextStyle(
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: FontWeight.normal,
     color: AppTextColors.secondaryText, // Uses adjusted grey
     height: 1.5,
@@ -68,45 +68,45 @@ class AppTextStyles {
 
   // Emphasis
   static const TextStyle boldText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: FontWeight.bold,
     color: AppTextColors.primaryText,
   );
 
   static const TextStyle italicText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     fontStyle: FontStyle.italic,
     color: Color(0xFF424242),
   );
 
   // Themed Text Colors
   static const TextStyle primaryText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     color: AppColors.primary, // Leaf Green
   );
 
   static const TextStyle secondaryText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     color: AppColors.secondary, // Updated to lighter grey
   );
 
   static const TextStyle tertiaryText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     color: AppColors.tertiary, // Light grey (not too close to white)
   );
 
   static const TextStyle infoText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     color: AppColors.info, // Sky Blue
   );
 
   static const TextStyle warningText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     color: AppColors.warning, // Sun Yellow
   );
 
   static const TextStyle dangerText = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
     color: AppColors.danger, // Berry Red
   );
 }

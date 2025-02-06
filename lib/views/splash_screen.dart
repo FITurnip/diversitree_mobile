@@ -34,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
           // Check if the response is indeed a List
           if (responseData["response"] is List) {
+            print("panjang response data ${responseData['response'].length}");
             // Now, we can safely cast it to List<Map<String, dynamic>>
             workspaceTable = List<Map<String, dynamic>>.from(responseData["response"]).map((record) {
               return {
@@ -139,7 +140,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
         child: Center(
           child: Image.asset(
-            'storage/Logo_Default.png', // Path to your PNG logo
+            'storage/Logo_White.png', // Path to your PNG logo
             width: width * 0.75, // Logo width is 3/4 of the screen width
             height: width * 0.75, // Logo height matches the width for aspect ratio
             fit: BoxFit.contain, // Ensure the logo scales well
