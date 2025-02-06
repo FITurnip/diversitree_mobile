@@ -1,82 +1,53 @@
-
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
-const statusPekerjaan = ["Inisiasi Pekerjaan", "Menentukan Area", "Pemotretan Pohon", "Table Shanon Wanner"];
+class AnimatedCircleBorderPainter extends StatefulWidget {
+  final double percentage;
+  final String description;
 
-class StepperInformation extends StatelessWidget {
-  final int urutan; // Accept the index/urutan
+  const AnimatedCircleBorderPainter({
+    Key? key,
+    required this.percentage,
+    required this.description,
+  }) : super(key: key);
 
-  const StepperInformation({
-    super.key,
-    required this.urutan, // Pass the urutan (index) as a parameter
-  });
+  @override
+  _AnimatedCircleBorderPainterState createState() => _AnimatedCircleBorderPainterState();
+}
 
-  // Calculate the percentage based on the index
-  double getPercentage() {
-    return urutan * 0.25; // Each step gets 25% progress
+class _AnimatedCircleBorderPainterState extends State<AnimatedCircleBorderPainter>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 1),
+    );
+    _animation = Tween<double>(begin: 0, end: widget.percentage).animate(_controller);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 140.0,
-      margin: EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        // BorderRadius only for the bottom corners
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(40), // Bottom left corner
-          bottomRight: Radius.circular(40), // Bottom right corner
-        ),
-        border: Border.all(
-          color: AppColors.primary, // Circular border color
-          width: 5, // Border width
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(width: 16,),
-            CustomPaint(
-              size: Size(80, 80), // Set the size of the circle
-              painter: CircleBorderPainter(percentage: getPercentage(), description: "${urutan}/4"),
-            ),
-            SizedBox(width: 32,),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 180), // Set max width here
-                  child: Text(
-                    statusPekerjaan[urutan -1],
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18, // Make the font size bigger
-                      fontWeight: FontWeight.bold, // Make the text bold
-                    ),
-                    softWrap: true, // Ensures the text wraps if needed
-                  ),
-                ),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 180), // Set max width here
-                  child: Text(
-                    urutan != 4 ? "Selanjutnya: ${statusPekerjaan[urutan]}" : "Final",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    softWrap: true, // Ensures the text wraps if needed
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return CustomPaint(
+          size: Size(56, 56),
+          painter: CircleBorderPainter(percentage: _animation.value, description: widget.description),
+        );
+      },
     );
   }
 }
@@ -85,43 +56,41 @@ class CircleBorderPainter extends CustomPainter {
   final double percentage;
   final String description;
 
-  // Constructor accepting a percentage parameter
   CircleBorderPainter({required this.percentage, required this.description});
 
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 15; // Set the thickness of the border
+      ..strokeWidth = 6;
 
-    // Draw the background gray arc (90% of the circle)
-    paint.color = Colors.white; // Set the color for the gray section
-    double sweepAngle = 2 * 3.1416; // Full circle
+    // Draw background circle
+    paint.color = Colors.white;
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
-      0, // Start from the top (12 o'clock)
-      sweepAngle, // Full circle, we will overwrite the start with the green arc
-      false, // Do not connect the arc back to the start point
+      0,
+      2 * pi,
+      false,
       paint,
     );
 
-    // Draw the foreground green arc (10% of the circle)
-    paint.color = Colors.green; // Set the color for the green section
-    sweepAngle = percentage * 2 * 3.1416; // Custom percentage of the full circle's angle (360 degrees)
+    // Draw animated progress arc
+    paint.color = AppColors.info;
+    double sweepAngle = percentage * 2 * pi;
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
-      -3.1416 / 2, // Start at the top (12 o'clock position, -90 degrees in radians)
-      sweepAngle, // The custom percentage (e.g., 10% of the circle)
-      false, // Do not connect the arc back to the start point
+      -pi / 2,
+      sweepAngle,
+      false,
       paint,
     );
 
-    // Draw the centered text
+    // Draw centered text
     TextSpan textSpan = TextSpan(
-      text: '${description}', // Text showing the percentage (e.g., 10%)
+      text: description,
       style: TextStyle(
         color: Colors.white,
-        fontSize: 16, // Font size for the text
+        fontSize: 12,
         fontWeight: FontWeight.bold,
       ),
     );
@@ -131,23 +100,85 @@ class CircleBorderPainter extends CustomPainter {
       textAlign: TextAlign.center,
       textDirection: TextDirection.ltr,
     );
-
-    // Layout the text
-    textPainter.layout(
-      minWidth: 0,
-      maxWidth: size.width,
-    );
-
-    // Center the text in the middle of the circle
+    textPainter.layout(minWidth: 0, maxWidth: size.width);
     double dx = (size.width - textPainter.width) / 2;
     double dy = (size.height - textPainter.height) / 2;
-
-    // Draw the text on the canvas
     textPainter.paint(canvas, Offset(dx, dy));
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+    return true;
+  }
+}
+
+const statusPekerjaan = ["Inisiasi Pekerjaan", "Menentukan Area", "Pemotretan Pohon", "Table Shanon Wanner"];
+
+class StepperInformation extends StatelessWidget {
+  final int urutan;
+
+  const StepperInformation({
+    super.key,
+    required this.urutan,
+  });
+
+  double getPercentage() {
+    return urutan * 0.25;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 92.0,
+      margin: EdgeInsets.only(bottom: 8, top: 4, left: 8, right: 8),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(width: 16),
+            AnimatedCircleBorderPainter(
+              percentage: getPercentage(),
+              description: "$urutan/4",
+            ),
+            SizedBox(width: 32),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 200),
+                  child: Text(
+                    statusPekerjaan[urutan - 1],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    softWrap: true,
+                  ),
+                ),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 200),
+                  child: Text(
+                    urutan != 4 ? "Selanjutnya: ${statusPekerjaan[urutan]}" : "Final",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontStyle: FontStyle.italic,
+                      fontSize: 12,
+                    ),
+                    softWrap: true,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

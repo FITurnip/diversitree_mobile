@@ -51,12 +51,12 @@ class _RingkasanInformasiState extends State<RingkasanInformasi> {
                         width: 120, // Fixed width for the label
                         child: Text(
                           "Luas Area",
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12),
                         ),
                       ),
                       Text(
-                        ": 20.3 m2",
-                        style: TextStyle(color: Colors.white),
+                        ": ${widget.workspaceData['luas_persegi']} m²",
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ],
                   ),
@@ -66,12 +66,12 @@ class _RingkasanInformasiState extends State<RingkasanInformasi> {
                         width: 120, // Fixed width for the label
                         child: Text(
                           "Teridentifikasi",
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 12),
                         ),
                       ),
                       Text(
-                        ": 10 pohon",
-                        style: TextStyle(color: Colors.white),
+                        ": ${widget.workspaceData['pohon'] is List<dynamic> ? widget.workspaceData['pohon'].length : '0'} pohon",
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ],
                   ),
