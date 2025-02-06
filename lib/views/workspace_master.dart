@@ -1,6 +1,7 @@
 import 'package:diversitree_mobile/components/stepper_button.dart';
 import 'package:diversitree_mobile/components/stepper_information.dart';
 import 'package:diversitree_mobile/components/header.dart';
+import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/core/workspace_service.dart';
 import 'package:diversitree_mobile/views/pemotretan_pohon.dart';
 import 'package:diversitree_mobile/views/shannon_wanner_table.dart';
@@ -45,6 +46,41 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    margin: EdgeInsets.only(
+                      top: 8.0,
+                      left: 8.0,
+                      right: 8.0,
+                      bottom: 8.0
+                    ),
+                    height: 40,
+                    padding: EdgeInsets.only(left: 16.0, right: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: AppColors.info,
+                        width: 1.5, // Border width
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Baru di-update",
+                          style: TextStyle(
+                            color: AppColors.info,
+                            fontSize: 12, // Customize font size if needed
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {},
+                          padding: EdgeInsets.all(0.0),
+                          icon: Icon(Icons.refresh, color: AppColors.primary ,size: 24,), // Group icon,
+                        )
+                      ],
+                    ),
+                  ),
+
                   StepperInformation(urutan: urutanSaatIni),
             
                   Padding(

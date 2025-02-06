@@ -120,32 +120,32 @@ class _HomeState extends State<Home> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 20),
-            
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "Cari workspace", // Floating label
-                    suffixIcon: Icon(Icons.search), // Search icon
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0), // Rounded border
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 4.0),
+                  height: 40,
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: "Cari workspace", // Floating label
+                      suffixIcon: Icon(Icons.search), // Search icon
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0), // Rounded border
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.primary), // Border color when not focused
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                        borderSide: BorderSide(color: AppColors.primary), // Border color when focused
+                      ),
+                      suffixIconColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primary), // Border color when not focused
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      borderSide: BorderSide(color: AppColors.primary), // Border color when focused
-                    ),
-                    suffixIconColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 14,
-                    ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 16.0),
                   ),
                 ),
-
-                SizedBox(height: 20),
             
                 Expanded(
                   child: GridView.builder(

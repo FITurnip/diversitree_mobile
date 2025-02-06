@@ -75,7 +75,7 @@ class CircleBorderPainter extends CustomPainter {
     );
 
     // Draw animated progress arc
-    paint.color = AppColors.info;
+    paint.color = AppColors.primary;
     double sweepAngle = percentage * 2 * pi;
     canvas.drawArc(
       Rect.fromCircle(center: Offset(size.width / 2, size.height / 2), radius: size.width / 2),
@@ -132,8 +132,8 @@ class StepperInformation extends StatelessWidget {
       height: 92.0,
       margin: EdgeInsets.only(bottom: 8, top: 4, left: 8, right: 8),
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        color: AppColors.info,
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
