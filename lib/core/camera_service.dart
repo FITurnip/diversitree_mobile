@@ -1,6 +1,7 @@
 
 import 'package:camera/camera.dart';
 import 'package:diversitree_mobile/core/workspace_service.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -10,10 +11,23 @@ class CameraService {
   static bool isSavingNewCapturedImages = false;
   static int savedImages = 0;
   static int newCapturedImagesLength = 0;
+  static CameraDescription? _backCamera;
 
-  static List<CameraDescription> cameras = [];
   static Future<void> initializeCameras() async {
-    cameras = await availableCameras();
+    WidgetsFlutterBinding.ensureInitialized();
+    final cameras = await availableCameras();
+    _backCamera = cameras.firstWhere(
+      (camera) => camera.lensDirection == CameraLensDirection.back,
+      orElse: () => throw Exception('No back camera found!'),
+    );
+  }
+
+  static CameraDescription getBackCamera() {
+    // We assume the camera is initialized or an exception will be thrown
+    if (_backCamera == null) {
+      throw Exception('Camera not initialized. Please initialize the cameras first.');
+    }
+    return _backCamera!;
   }
 
   static Future<String> saveImageToStorage(XFile file) async {
@@ -40,12 +54,5 @@ class CameraService {
     String workspace_id
   ) async {
     WorkspaceService.saveCapturedImage(workspaceData, image, workspace_id);
-  }
-
-  static CameraDescription? getBackCamera() {
-    return cameras.firstWhere(
-      (camera) => camera.lensDirection == CameraLensDirection.back,
-      orElse: () => throw Exception('No back camera found!'),
-    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:diversitree_mobile/components/camera_screen.dart';
+import 'package:diversitree_mobile/core/camera_service.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 
 import 'package:flutter/material.dart';
@@ -86,30 +87,21 @@ class _RingkasanInformasiState extends State<RingkasanInformasi> {
             margin: EdgeInsets.only(left: 8.0),
             child: OutlinedButton(
               onPressed: () async {
-                // Ensure that plugin services are initialized before accessing availableCameras.
-                WidgetsFlutterBinding.ensureInitialized();
-
-                // Get the list of available cameras.
-                final cameras = await availableCameras();
-
                 // Find the back camera.
-                final backCamera = cameras.firstWhere(
-                  (camera) => camera.lensDirection == CameraLensDirection.back,
-                  orElse: () => throw Exception('No back camera found!'),
-                );
+                final backCamera = CameraService.getBackCamera();
 
                 // page route to camera screen
-                print("Navigating to Camera Screen");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => CameraScreen(
                       camera: backCamera,
-                      workspace_id: widget.workspaceData['id'],
-                      newCapturedImages: widget.newCapturedImages ?? [],
+                      workspaceId: widget.workspaceData['id'],
+                      capturedImages: widget.newCapturedImages ?? [],
                       saveImages: () {
                         widget.saveCapturedImage!();
                       },
+                      mode: 'multiple',
                     ),
                   ),
                 );

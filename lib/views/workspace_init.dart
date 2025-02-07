@@ -1,7 +1,6 @@
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/helper/format_text_service.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class WorkspaceInit extends StatefulWidget {
   final Map<String, dynamic> workspaceData;

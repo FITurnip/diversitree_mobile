@@ -1,3 +1,5 @@
+import 'package:diversitree_mobile/components/camera_screen.dart';
+import 'package:diversitree_mobile/core/camera_service.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/helper/api_service.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +30,7 @@ class _IdentifikasiPohonState extends State<IdentifikasiPohon> {
   void initState() {
     super.initState();
     _spesiesController.text = widget.pohonData["nama_spesies"] ?? "";
-    _dbhController.text = widget.pohonData["dbh"].toString() ?? "0.0";
+    _dbhController.text = widget.pohonData["dbh"].toString();
   }
 
   @override
@@ -70,7 +72,24 @@ class _IdentifikasiPohonState extends State<IdentifikasiPohon> {
             top: 40,
             right: 16,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                final backCamera = CameraService.getBackCamera();
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CameraScreen(
+                      camera: backCamera,
+                      workspaceId: widget.workspaceId,
+                      capturedImages: [],
+                      saveImages: () {
+                        // widget.saveCapturedImage!();
+                      },
+                      mode: 'single',
+                    ),
+                  ),
+                );
+              },
               child: Icon(
                 Icons.camera_alt,
                 color: AppTextColors.onPrimary,

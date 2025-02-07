@@ -1,9 +1,10 @@
+import 'package:diversitree_mobile/core/camera_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:diversitree_mobile/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+  CameraService.initializeCameras();
   runApp(Diversitree());
 }
 
