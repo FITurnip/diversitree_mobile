@@ -63,23 +63,21 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
     });
 
     while (CameraService.newCapturedImages.isNotEmpty) {
-      var image = CameraService.newCapturedImages.removeAt(0);;
+      var image = CameraService.newCapturedImages[0];
       
-      await CameraService.saveCapturedImage(widget.workspaceData, image, widget.workspaceData["id"]);
+      await CameraService.saveCapturedImage(widget.workspaceData, image, widget.workspaceData["id"], null);
       
       setState(() {
         CameraService.savedImages++;
+        CameraService.newCapturedImages.removeAt(0);
         reassignListPohon();
       });
 
       await Future.delayed(Duration(seconds: 1)); // Optional delay per image
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text("Semua foto telah disimpan!"),
-    ));
-
     setState(() {
+      // CameraService.newCapturedImages.removeAt(0);
       CameraService.isSavingNewCapturedImages = false;
       CameraService.savedImages = 0;
       CameraService.newCapturedImagesLength = 0;
@@ -89,6 +87,10 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
 
     _savingCompleter?.complete();
     _savingCompleter = null;
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text("Semua foto telah disimpan!"),
+    ));
   }
 
   @override
@@ -144,7 +146,7 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => IdentifikasiPohon(pohonData : listPohon[index], workspaceId : widget.workspaceData["id"]),
+                      builder: (context) => IdentifikasiPohon(workspaceData: widget.workspaceData, pohonData : listPohon[index], workspaceId : widget.workspaceData["id"]),
                     ),
                   );
                 },

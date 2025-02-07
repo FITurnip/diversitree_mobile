@@ -8,16 +8,18 @@ import 'package:diversitree_mobile/core/styles.dart';
 class CameraScreen extends StatefulWidget {
   final CameraDescription camera;
   final String workspaceId;
-  final Function() saveImages;
+  final Function() saveImage;
   final String mode; // New parameter to decide mode ('single' or 'multiple')
-  final List<XFile> capturedImages; // List to store multiple images for 'multiple' mode
+  final List<XFile>? capturedImages; // List to store multiple images for 'multiple' mode
+  final Function(XFile)? syncCaptureImage;
 
   CameraScreen({
     required this.camera,
     required this.workspaceId,
-    required this.saveImages,
+    required this.saveImage,
     required this.mode,
-    required this.capturedImages,
+    this.capturedImages,
+    this.syncCaptureImage,
   });
 
   @override
@@ -27,9 +29,9 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
-  XFile? capturedImage; // To store the captured image
   bool _isFlashing = false;
-  bool _imageCaptured = false; // Flag to track if an image has been captured
+  XFile? capturedImage;
+  // bool _imageCaptured = false; // Flag to track if an image has been captured
 
   @override
   void initState() {
@@ -53,7 +55,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   // Function to capture image
   Future<void> captureImage() async {
-    if (widget.mode == 'single' && _imageCaptured) return; // If it's single mode and an image is already captured, do nothing
+    // if (widget.mode == 'single' && _imageCaptured) return; // If it's single mode and an image is already captured, do nothing
 
     try {
       // Trigger the flash effect
@@ -68,9 +70,9 @@ class _CameraScreenState extends State<CameraScreen> {
       setState(() {
         if (widget.mode == 'single') {
           capturedImage = image; // Store the captured image
-          _imageCaptured = true; // Update flag to indicate an image has been captured
+          // _imageCaptured = true; // Update flag to indicate an image has been captured
         } else {
-          widget.capturedImages.insert(0, image); // Store in list if mode is multiple
+          widget.capturedImages?.insert(0, image); // Store in list if mode is multiple
         }
         _isFlashing = false;
       });
@@ -86,8 +88,11 @@ class _CameraScreenState extends State<CameraScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => CameraGallery(
-          images: widget.mode == 'single' ? [capturedImage!] : widget.capturedImages,
-          saveImages: widget.saveImages,
+          images: widget.mode == 'single' ? [capturedImage!] : widget.capturedImages!,
+          saveImage: () {
+            if(widget.mode == 'single') widget.syncCaptureImage!(capturedImage!);
+            widget.saveImage();
+          },
         ),
       ),
     );
@@ -103,7 +108,7 @@ class _CameraScreenState extends State<CameraScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                widget.capturedImages.clear();
+                widget.capturedImages?.clear();
                 Navigator.of(context).pop(true); // Do pop
               },
               child: Text(
@@ -130,7 +135,8 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if(widget.capturedImages.length == 0) return true;
+        if(widget.capturedImages?.length == 0 && widget.mode == 'multiple') return true;
+        if(widget.mode == 'single') return true;
         // Call the extracted method for confirmation dialog
         bool? shouldPop = await _showConfirmationDialog(context);
 
@@ -180,7 +186,7 @@ class _CameraScreenState extends State<CameraScreen> {
                     onPressed: () async {
                       bool? shouldPop = true;
 
-                      if(widget.capturedImages.length > 0) shouldPop = await _showConfirmationDialog(context);
+                      if(widget.capturedImages!.length > 0 && widget.mode == 'multiple') shouldPop = await _showConfirmationDialog(context);
 
                       // If user confirms, pop the page
                       if (shouldPop == true) {
@@ -218,7 +224,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       // Navigate to the gallery page when the photo_library button is pressed
                       if (widget.mode == 'single' && capturedImage != null) {
                         openGallery(context);
-                      } else if (widget.mode == 'multiple' && widget.capturedImages.isNotEmpty) {
+                      } else if (widget.mode == 'multiple' && widget.capturedImages!.isNotEmpty) {
                         openGallery(context);
                       }
                     },
@@ -236,14 +242,14 @@ class _CameraScreenState extends State<CameraScreen> {
                               fit: BoxFit.cover, // Make the image cover the button area
                             ),
                           )
-                    : widget.capturedImages.isEmpty
+                    : widget.capturedImages!.isEmpty
                         ? Icon(
                             Icons.photo_album,
                             color: AppColors.secondary.withOpacity(0.8),
                           )
                         : ClipOval(
                             child: Image.file(
-                              File(widget.capturedImages.first.path), // Show the first image in the list (last captured)
+                              File(widget.capturedImages!.first.path), // Show the first image in the list (last captured)
                               width: 50.0,
                               height: 50.0,
                               fit: BoxFit.cover, // Make the image cover the button area

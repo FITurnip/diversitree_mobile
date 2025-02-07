@@ -51,8 +51,9 @@ class CameraService {
   (
     Map<String, dynamic> workspaceData,
     XFile image,
-    String workspace_id
+    String workspace_id,
+    String? path_foto,
   ) async {
-    WorkspaceService.saveCapturedImage(workspaceData, image, workspace_id);
+    WorkspaceService.saveCapturedImage(workspaceData, image, workspace_id, path_foto ?? null);
   }
 }

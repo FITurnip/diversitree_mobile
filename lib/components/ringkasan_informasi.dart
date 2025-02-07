@@ -98,7 +98,7 @@ class _RingkasanInformasiState extends State<RingkasanInformasi> {
                       camera: backCamera,
                       workspaceId: widget.workspaceData['id'],
                       capturedImages: widget.newCapturedImages ?? [],
-                      saveImages: () {
+                      saveImage: () {
                         widget.saveCapturedImage!();
                       },
                       mode: 'multiple',

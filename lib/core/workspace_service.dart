@@ -60,10 +60,11 @@ class WorkspaceService {
     }
   }
 
-  static Future<void> saveCapturedImage(Map<String, dynamic> workspaceData, XFile image, String workspace_id) async {
+  static Future<void> saveCapturedImage(Map<String, dynamic> workspaceData, XFile image, String workspace_id, String? path_foto) async {
     var response = await ApiService.post("/workspace/save-pohon", {
       "foto": image,
       "id": workspace_id,
+      "path_foto": path_foto,
     });var responseData = json.decode(response.body);
 
     if (responseData["response"] is Map) {

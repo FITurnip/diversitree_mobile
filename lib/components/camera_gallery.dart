@@ -7,9 +7,9 @@ import 'package:camera/camera.dart';
 
 class CameraGallery extends StatefulWidget {
   final List<XFile> images;
-  final Function() saveImages;
+  final Function() saveImage;
 
-  CameraGallery({required this.images, required this.saveImages});
+  CameraGallery({required this.images, required this.saveImage});
 
   @override
   _CameraGalleryState createState() => _CameraGalleryState();
@@ -42,7 +42,7 @@ class _CameraGalleryState extends State<CameraGallery> {
                       children: [
                         ElevatedButton.icon(
                           onPressed: () {
-                            widget.saveImages();
+                            widget.saveImage();
                           },
                           icon: Icon(Icons.add, color: Colors.white),
                           label: Text(
@@ -62,33 +62,31 @@ class _CameraGalleryState extends State<CameraGallery> {
                     SizedBox(height: 8.0,),
                     Text("Jumlah Pohon: ${widget.images.length}"),
                     SizedBox(height: 8.0,),
-                    Center(
-                      child: Wrap(
-                        spacing: 4, // Space between items horizontally
-                        runSpacing: 4, // Space between lines vertically
-                        children: List.generate(widget.images.length, (index) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PhotoViewPage(image: widget.images[index]),
-                                ),
-                              );
-                            },
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8), // Optional rounded corners
-                              child: Container(
-                                width: (MediaQuery.of(context).size.width / 4) - 8,
-                                child: Image.file(
-                                  File(widget.images[index].path),
-                                  fit: BoxFit.cover, // Ensure the image fills the container
-                                ),
+                    Wrap(
+                      spacing: 4, // Space between items horizontally
+                      runSpacing: 4, // Space between lines vertically
+                      children: List.generate(widget.images.length, (index) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PhotoViewPage(image: widget.images[index]),
+                              ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8), // Optional rounded corners
+                            child: Container(
+                              width: (MediaQuery.of(context).size.width / 4) - 8,
+                              child: Image.file(
+                                File(widget.images[index].path),
+                                fit: BoxFit.cover, // Ensure the image fills the container
                               ),
                             ),
-                          );
-                        }),
-                      ),
+                          ),
+                        );
+                      }),
                     )
                   ],
                 ),
