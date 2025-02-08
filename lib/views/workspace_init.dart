@@ -29,6 +29,7 @@ class _WorkspaceInitState extends State<WorkspaceInit> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Nama Workspace field (enabled) with default value
         Container(
@@ -69,7 +70,7 @@ class _WorkspaceInitState extends State<WorkspaceInit> {
         Container(
           height: 48,
           margin: EdgeInsets.only(
-            bottom: 20
+            bottom: 4
           ),
           child: Row(
             children: [
@@ -112,6 +113,11 @@ class _WorkspaceInitState extends State<WorkspaceInit> {
               )
             ],
           ),
+        ),
+
+        Container(
+          margin: EdgeInsets.only(left: 12, bottom: 20),
+          child: Text("Ubah nama di menu pengguna", style: TextStyle(color: AppColors.secondary, fontSize: 10),)
         ),
 
         Container(

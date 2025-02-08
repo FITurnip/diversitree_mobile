@@ -1,6 +1,6 @@
 import 'package:diversitree_mobile/components/stepper_button.dart';
 import 'package:diversitree_mobile/components/stepper_information.dart';
-import 'package:diversitree_mobile/components/header.dart';
+import 'package:diversitree_mobile/components/diversitree_app_bar.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/core/workspace_service.dart';
 import 'package:diversitree_mobile/views/pemotretan_pohon.dart';
@@ -35,7 +35,7 @@ class _WorkspaceMasterState extends State<WorkspaceMaster> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: header(titleText: "Workspace"),
+      appBar: DiversitreeAppBar(titleText: "Workspace"),
       body: Stack(
         alignment: Alignment.topLeft,
         children: [

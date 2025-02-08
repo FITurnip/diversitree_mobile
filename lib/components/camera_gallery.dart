@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:diversitree_mobile/components/header.dart';
+import 'package:diversitree_mobile/components/diversitree_app_bar.dart';
 import 'package:diversitree_mobile/components/photo_view.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +27,7 @@ class _CameraGalleryState extends State<CameraGallery> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: header(titleText: "Foto Terbaru"),
+      appBar: DiversitreeAppBar(titleText: "Foto Terbaru"),
       body: widget.images.isEmpty
           ? Center(child: Text('Belum ada foto diambil!'))
           : Padding(

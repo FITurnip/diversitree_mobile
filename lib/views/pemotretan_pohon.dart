@@ -43,7 +43,6 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
   // Method to update progress while saving images
   Completer<void>? _savingCompleter;
   Future<void> saveImages() async {
-    print("berjalan ${_savingCompleter}");
     if (_savingCompleter != null && !_savingCompleter!.isCompleted) {
       moveNewCapturedImage();      
       backFromCameraGallery();
@@ -142,11 +141,17 @@ class _PemotretanPohonState extends State<PemotretanPohon> {
             itemBuilder: (context, index) {
               return GestureDetector(
                 onTap: () {
-                  print("widget.workspaceData ${widget.workspaceData['id']}");
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => IdentifikasiPohon(workspaceData: widget.workspaceData, pohonData : listPohon[index], workspaceId : widget.workspaceData["id"]),
+                      builder: (context) => IdentifikasiPohon(
+                        workspaceData: widget.workspaceData,
+                        pohonData : listPohon[index],
+                        workspaceId : widget.workspaceData["id"],
+                        reassignListPohon: () {
+                          reassignListPohon();
+                        },
+                      ),
                     ),
                   );
                 },

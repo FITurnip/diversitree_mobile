@@ -54,6 +54,6 @@ class CameraService {
     String workspace_id,
     String? path_foto,
   ) async {
-    WorkspaceService.saveCapturedImage(workspaceData, image, workspace_id, path_foto ?? null);
+    await WorkspaceService.saveCapturedImage(workspaceData, image, workspace_id, path_foto ?? null);
   }
 }

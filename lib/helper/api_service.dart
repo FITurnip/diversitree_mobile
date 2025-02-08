@@ -22,7 +22,11 @@ class ApiService {
       print('ApiService: GET Request URL: $_url');
     }
 
-    var response = await http.get(_url);
+    var headers = {
+      "Authorization": "Bearer 67a6b2e14bd7a44671008a92|XHvuUXG7cDsSFyB8hA53dmuVbcBuIUpoP2H0keWJ60c68a53",
+    };
+
+    var response = await http.get(_url, headers: headers);
 
     // Print the response in debug mode
     if (kDebugMode) {
@@ -41,7 +45,12 @@ class ApiService {
       print('ApiService: Request Body: $body');
     }
 
+    var headers = {
+      "Authorization": "Bearer 67a6b2e14bd7a44671008a92|XHvuUXG7cDsSFyB8hA53dmuVbcBuIUpoP2H0keWJ60c68a53",
+    };
+
     var request = http.MultipartRequest('POST', _url);
+    request.headers.addAll(headers);
 
     // Ensure `body` is not null before iterating
     if (body != null) {

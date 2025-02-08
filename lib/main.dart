@@ -1,6 +1,6 @@
 import 'package:diversitree_mobile/core/camera_service.dart';
+import 'package:diversitree_mobile/views/home.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:diversitree_mobile/views/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -33,7 +33,7 @@ class DiversitreeState extends State<Diversitree> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Diversitree App',
-      home: SplashScreen(),  // Start with SplashScreen
+      home: Home(),  // Start with SplashScreen
     );
   }
 }

@@ -10,8 +10,9 @@ class IdentifikasiPohon extends StatefulWidget {
   final Map<String, dynamic> pohonData;
   final String workspaceId;
   final Map<String, dynamic> workspaceData;
+  final Function() reassignListPohon;
   
-  IdentifikasiPohon({required this.pohonData, required this.workspaceId, required this.workspaceData});
+  IdentifikasiPohon({required this.pohonData, required this.workspaceId, required this.workspaceData, required this.reassignListPohon});
 
   @override
   _IdentifikasiPohonState createState() => _IdentifikasiPohonState();
@@ -20,7 +21,6 @@ class IdentifikasiPohon extends StatefulWidget {
 class _IdentifikasiPohonState extends State<IdentifikasiPohon> {
   final TextEditingController _spesiesController = TextEditingController();
   final TextEditingController _dbhController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -29,22 +29,62 @@ class _IdentifikasiPohonState extends State<IdentifikasiPohon> {
     super.dispose();
   }
 
+  Widget? _foto_pohon;
+
   @override
   void initState() {
     super.initState();
+    // Ensure the URL is valid and safe for network access
+    final imageUrl = ApiService.urlStorage + widget.pohonData["path_foto"];
+    
+    // Initialize the image widget
+    _foto_pohon = Image.network(
+      imageUrl,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) {
+          return child; // Image loaded, show the image
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      (loadingProgress.expectedTotalBytes ?? 1)
+                  : null,
+            ),
+          );
+        }
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return Center(
+          child: Icon(Icons.error, color: Colors.red),
+        );
+      },
+    );
     _spesiesController.text = widget.pohonData["nama_spesies"] ?? "";
     _dbhController.text = widget.pohonData["dbh"].toString();
+  }
+  
+  _updateImgWidget() async {
+    // Ensure the URL is valid and safe for network access
+    final imageUrl = ApiService.urlStorage + widget.pohonData["path_foto"];
+    print('new url: ${widget.pohonData["path_foto"]}');
+    
+    setState(() {
+      _foto_pohon = CircularProgressIndicator();
+    });
+    Uint8List bytes = (await NetworkAssetBundle(Uri.parse(imageUrl)).load(imageUrl))
+        .buffer
+        .asUint8List();
+    setState(() {
+      _foto_pohon = Image.memory(bytes, fit: BoxFit.cover);
+    });
   }
 
   XFile? capturedImage;
   
   void saveCapturedImage() async {
-    setState(() {
-      _isLoading = true;
-    });
-
     try {
-      print("capturedImage, ${capturedImage}");
       await CameraService.saveCapturedImage(
         widget.workspaceData, 
         capturedImage!, 
@@ -52,14 +92,16 @@ class _IdentifikasiPohonState extends State<IdentifikasiPohon> {
         widget.pohonData["path_foto"]
       );
 
-      Navigator.pop(context);
-      Navigator.pop(context);
     } catch (e) {
       print("Error saving image: $e");
     } finally {
+      print('last url: ${widget.pohonData["path_foto"]}');
       setState(() {
-        _isLoading = false;
+        widget.reassignListPohon();
       });
+      _updateImgWidget();
+      Navigator.pop(context);
+      Navigator.pop(context);
     }
   }
 
@@ -71,10 +113,7 @@ class _IdentifikasiPohonState extends State<IdentifikasiPohon> {
           body: Stack(
             children: [
               Positioned.fill(
-                child: Image.network(
-                  ApiService.urlStorage + widget.pohonData["path_foto"], 
-                  fit: BoxFit.cover,
-                ),
+                child: _foto_pohon ?? Center(child: CircularProgressIndicator(),),
               ),
               Positioned(
                 top: 40,
@@ -187,15 +226,6 @@ class _IdentifikasiPohonState extends State<IdentifikasiPohon> {
             ],
           ),
         ),
-        if (_isLoading)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
-            ),
-          ),
       ],
     );
   }
