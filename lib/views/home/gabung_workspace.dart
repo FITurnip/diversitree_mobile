@@ -46,7 +46,7 @@ class _QRViewExampleState extends State<QRViewExample> {
       children: <Widget>[
         Expanded(flex: 1, child: _buildQrView(context)),
         const SizedBox(height: 8,),
-        const Text('Pindai QR Code', style: TextStyle(fontSize: 20),),
+        const Text('Pindai QR Code', style: TextStyle(fontSize: 20, color: AppColors.info),),
         const Text('Workspace Bersama', style: TextStyle(fontSize: 12),),
         const SizedBox(height: 16,),
       ],
@@ -59,10 +59,10 @@ class _QRViewExampleState extends State<QRViewExample> {
       onQRViewCreated: _onQRViewCreated,
       overlay: QrScannerOverlayShape(
         borderColor: AppColors.primary,
-        overlayColor: Colors.black.withOpacity(0.5),
+        overlayColor: Colors.black.withOpacity(0.52),
         borderRadius: 8,
-        borderLength: 30,
-        borderWidth: 1,
+        borderLength: 40,
+        borderWidth: 8,
       ),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );

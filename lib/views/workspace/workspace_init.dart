@@ -1,5 +1,6 @@
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/helper/format_text_service.dart';
+import 'package:diversitree_mobile/views/workspace/workspace_tim.dart';
 import 'package:flutter/material.dart';
 
 class WorkspaceInit extends StatefulWidget {
@@ -107,7 +108,14 @@ class _WorkspaceInitState extends State<WorkspaceInit> {
                   borderRadius: BorderRadius.circular(12)
                 ),
                 child: IconButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WorkspaceTim(workspaceId: widget.workspaceData["id"]),
+                      )
+                    );
+                  },
                   icon: Icon(Icons.group, color: Colors.white,size: 30), // Group icon,
                 ),
               )

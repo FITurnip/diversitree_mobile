@@ -10,6 +10,10 @@ class ApiService {
 
   static const urlStorage = 'http://$_prefixUrl/storage/';
 
+  static String getPath(path) {
+    return 'http://$_prefixUrl/api$path';
+  }
+
   static Uri _setUri(path) {
     return Uri.http(_prefixUrl, 'api$path');
   }

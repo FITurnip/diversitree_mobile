@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   CameraService.initializeCameras();
+  AuthService.prepare();
   runApp(Diversitree());
 }
 
@@ -27,7 +28,6 @@ class DiversitreeState extends State<Diversitree> {
   void initState() {
     super.initState();
     requestPermissions();
-    AuthService.prepare();
   }
 
   @override

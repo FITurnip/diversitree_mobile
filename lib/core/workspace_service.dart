@@ -61,3 +61,26 @@ class WorkspaceService {
     await _refreshLocaldata(responseData["response"], workspaceData);
   }
 }
+
+class WorkspaceTimService {
+  static Future<dynamic> _hitApi(String workspaceId, String url) async {
+    var response = await ApiService.post(url, {"workspace_id": workspaceId}, withAuth: true);
+    return response;
+  }
+
+  static Future<List<Map<String, dynamic>>> getList(String workspaceId) async {
+    var response = await _hitApi(workspaceId, '/workspace/tim/list');
+    var responseData = json.decode(response.body);
+    if (responseData['response'] is List<Map<String, dynamic>>) {
+      return (responseData['response'] as List)
+          .map((e) => e as Map<String, dynamic>) // Ensures correct type
+          .toList();
+    } else {
+      throw Exception("Unexpected responseData['response'] format: ${responseData['response']}");
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> addToTim(String workspaceId) async {
+    return await _hitApi(workspaceId, '/workspace/tim/tambah-anggota');
+  }
+}

@@ -66,10 +66,10 @@ class _StepperButtonState extends State<StepperButton> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primary,
-                    side: BorderSide(color: AppColors.primary, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    disabledBackgroundColor: AppColors.lightPrimary
                   ),
                 ),
               ),
@@ -87,10 +87,10 @@ class _StepperButtonState extends State<StepperButton> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    side: BorderSide(color: AppColors.primary, width: 2),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    disabledBackgroundColor: AppColors.lightPrimary
                   ),
                 ),
               ),

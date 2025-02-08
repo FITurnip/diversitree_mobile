@@ -224,12 +224,14 @@ class _PenggunaState extends State<Pengguna> {
               : Column(
                 children: [
                   Container(
-                    height: 200,
-                    child: Image.asset('storage/Logo_Default.png', height: 160,),
+                    height: 160,
+                    child: Image.asset('storage/Logo_White.png', fit: BoxFit.cover,),
                   ),
-                  const SizedBox(height: 16,),
+                  const SizedBox(height: 24,),
+                  Text('Masuk ke akun terlebih dahulu!'),
+                  const SizedBox(height: 32,),
                   Container(
-                    width: 200,
+                    width: 240,
                     child: ElevatedButton(
                       onPressed: () async {
                         await Navigator.push(
@@ -239,7 +241,7 @@ class _PenggunaState extends State<Pengguna> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: AppColors.info,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: EdgeInsets.symmetric(vertical: 14, horizontal: 32),
                       ),

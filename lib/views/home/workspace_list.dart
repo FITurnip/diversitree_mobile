@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:diversitree_mobile/components/diversitree_app_bar.dart';
+import 'package:diversitree_mobile/core/auth_service.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/core/workspace_service.dart';
 import 'package:diversitree_mobile/helper/api_service.dart';
@@ -18,10 +19,11 @@ class _WorkspaceListState extends State<WorkspaceList> {
   bool _isLoading = true;
 
   Future<void> _initializeWorkspace() async {
-    await LocalDbService.dropDatabase();
+    // await LocalDbService.dropDatabase();
     // Initialize workspace in initState using widget.workspaceTable
     await WorkspaceController.setStatusWorkspaceTable();
-    await WorkspaceController.setWorkspaceTable();
+    bool isLoggedIn = await AuthService.checkAuth();
+    if(isLoggedIn) await WorkspaceController.setWorkspaceTable();
     setState(() {
       _isLoading = false;
     });

@@ -51,52 +51,67 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.lightPrimary,
       appBar: DiversitreeAppBar(titleText: 'Masuk'),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                  width: 120,
-                  height: 120, 
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primary,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.person_rounded,
-                      size: 80,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              SizedBox(height: 36),
-              _buildTextField("Email", emailController, "email", keyboardType: TextInputType.emailAddress),
-              _buildTextField("Password", passwordController, "password", obscureText: true),
-              const SizedBox(height: 24,),
-              Container(
+              SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    login();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, // Transparent background
-                    foregroundColor: AppColors.primary, // Text color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: AppColors.primary, width: 2), // Border color and width
+                child: Container(
+                    width: 120,
+                    height: 120, 
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary,
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                    child: Center(
+                      child: Icon(
+                        Icons.person_rounded,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                  child: Text(
-                    'Masuk',
-                    style: TextStyle(color: AppColors.primary, fontSize: 16),
-                  ),
+              ),
+              
+              SizedBox(height: 36),
+
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0),
+                  color: Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    _buildTextField("Email", emailController, "email", keyboardType: TextInputType.emailAddress),
+                    _buildTextField("Password", passwordController, "password", obscureText: true),
+                    const SizedBox(height: 24,),
+                    Container(
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          login();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white, // Transparent background
+                          foregroundColor: AppColors.primary, // Text color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: AppColors.primary, width: 2), // Border color and width
+                          ),
+                          padding: EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                        ),
+                        child: Text(
+                          'Masuk',
+                          style: TextStyle(color: AppColors.primary, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
     
@@ -139,6 +154,7 @@ class _LoginState extends State<Login> {
       {bool obscureText = false, TextInputType keyboardType = TextInputType.text}) {
     return Container(
       height: 48,
+      width: 280,
       margin: EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
