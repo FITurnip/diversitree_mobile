@@ -1,3 +1,4 @@
+import 'package:diversitree_mobile/core/auth_service.dart';
 import 'package:diversitree_mobile/core/camera_service.dart';
 import 'package:diversitree_mobile/views/home.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -26,6 +27,7 @@ class DiversitreeState extends State<Diversitree> {
   void initState() {
     super.initState();
     requestPermissions();
+    AuthService.prepare();
   }
 
   @override
@@ -33,7 +35,7 @@ class DiversitreeState extends State<Diversitree> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Diversitree App',
-      home: Home(),  // Start with SplashScreen
+      home: Home(),
     );
   }
 }

@@ -133,10 +133,11 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if(widget.capturedImages?.length == 0 && widget.mode == 'multiple') return true;
-        if(widget.mode == 'single') return true;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if(widget.capturedImages?.length == 0 && widget.mode == 'multiple') return;
+        if(widget.mode == 'single') return;
         // Call the extracted method for confirmation dialog
         bool? shouldPop = await _showConfirmationDialog(context);
 
@@ -144,7 +145,6 @@ class _CameraScreenState extends State<CameraScreen> {
         if (shouldPop == true) {
           Navigator.pop(context);
         }
-        return false; // Prevent default behavior until confirmation
       },
       child: Scaffold(
         body: Stack(

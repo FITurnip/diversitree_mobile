@@ -54,7 +54,7 @@ class _HomeState extends State<Home> {
           ),
         ],
 
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.lightPrimary,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.secondary,
         selectedFontSize: 0,

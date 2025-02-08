@@ -1,4 +1,7 @@
 import 'package:diversitree_mobile/components/diversitree_app_bar.dart';
+import 'package:diversitree_mobile/core/auth_service.dart';
+import 'package:diversitree_mobile/views/pengguna/login.dart';
+import 'package:diversitree_mobile/views/pengguna/register.dart';
 import 'package:flutter/material.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 
@@ -8,6 +11,31 @@ class Pengguna extends StatefulWidget {
 }
 
 class _PenggunaState extends State<Pengguna> {
+  bool ?isLoggedIn;
+  Future<void> setAuthCondition() async {
+    setState(() {
+      isLoggedIn = null;
+    });
+
+    bool loggedInStatus = await AuthService.checkAuth();
+    setState(() {
+      isLoggedIn = loggedInStatus;
+    });
+
+    print("isLoggedIn ${isLoggedIn}");
+
+    if (isLoggedIn == true) {
+      Map<String, dynamic> userData = AuthService.getCurrentUserData();
+      print(userData);
+      namaPenggunaController.text = userData["name"];
+      emailController.text = userData["email"];
+    } else if (isLoggedIn == false) {
+      // If the user is logged out, clear the input fields
+      namaPenggunaController.clear();
+      emailController.clear();
+    }
+  }
+
   // Controllers for input fields
   final TextEditingController namaPenggunaController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -16,7 +44,6 @@ class _PenggunaState extends State<Pengguna> {
 
   // User data
   Map<String, String> dataPengguna = {
-    "id": "",
     "nama": "",
     "email": "",
     "password": "",
@@ -39,6 +66,16 @@ class _PenggunaState extends State<Pengguna> {
     });
   }
 
+  Future<void> logout() async {
+    try {
+      await AuthService.logout(); // Log the user out asynchronously
+      print("Logout successful");
+      await setAuthCondition();  // Update the UI after logout
+    } catch (e) {
+      print("Error during logout: $e");
+    }
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -56,6 +93,7 @@ class _PenggunaState extends State<Pengguna> {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
+                logout();
               },
             ),
             TextButton(
@@ -112,65 +150,132 @@ class _PenggunaState extends State<Pengguna> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    setAuthCondition();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: DiversitreeAppBar(
         titleText: "Pengguna",
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              icon: Icon(Icons.exit_to_app, color: AppColors.danger,), // Logout icon
-              onPressed: () {
-                _showLogoutDialog(context);
-              }, // Logout action
+          if(isLoggedIn == true)
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: IconButton(
+                icon: Icon(Icons.exit_to_app, color: AppColors.danger,), // Logout icon
+                onPressed: () {
+                  _showLogoutDialog(context);
+                }, // Logout action
+              ),
             ),
-          ),
         ]
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Container(
-                width: 120, // Width of the icon container
-                height: 120, // Height of the icon container
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary, // Background color
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.person,
-                    size: 80, // Adjust the icon size
-                    color: Colors.white,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: isLoggedIn == null ?
+              CircularProgressIndicator(color: AppColors.primary,)
+              : isLoggedIn == true ?
+              Column(
+                children: [
+                  Container(
+                    width: 120, // Width of the icon container
+                    height: 120, // Height of the icon container
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary, // Background color
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.person,
+                        size: 80, // Adjust the icon size
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              SizedBox(height: 36),
-              _buildTextField("Nama Lengkap", namaPenggunaController, "nama"),
-              _buildTextField("Email", emailController, "email", keyboardType: TextInputType.emailAddress),
-              _buildTextField("Password", passwordController, "password", obscureText: true),
-              _buildTextField("Konfirmasi Password", confirmPasswordController, "confirmation_password", obscureText: true),
-              SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showSimpanDialog(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                  SizedBox(height: 36),
+                  _buildTextField("Nama Lengkap", namaPenggunaController, "nama"),
+                  _buildTextField("Email", emailController, "email", keyboardType: TextInputType.emailAddress),
+                  _buildTextField("Password Baru", passwordController, "password", obscureText: true),
+                  _buildTextField("Konfirmasi Password baru", confirmPasswordController, "confirmation_password", obscureText: true),
+                  SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showSimpanDialog(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                      ),
+                      child: Text("Simpan Perubahan", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    ),
                   ),
-                  child: Text("Simpan Perubahan", style: TextStyle(color: Colors.white, fontSize: 16)),
-                ),
+                ],
+              )
+              : Column(
+                children: [
+                  Container(
+                    height: 200,
+                    child: Image.asset('storage/Logo_Default.png', height: 160,),
+                  ),
+                  const SizedBox(height: 16,),
+                  Container(
+                    width: 200,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Login(onAuth: setAuthCondition,)),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                      ),
+                      child: Text('Masuk', style: TextStyle(color: Colors.white, fontSize: 16)),
+                    ),
+                  ),
+        
+                  const SizedBox(height: 8,),
+                  Container(
+                    width: 200,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Register(onAuth: setAuthCondition),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white, // Transparent background
+                        foregroundColor: AppColors.primary, // Text color
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: AppColors.primary, width: 2), // Border color and width
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 32),
+                      ),
+                      child: Text(
+                        'Buat Akun Baru',
+                        style: TextStyle(color: AppColors.primary, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
           ),
         ),
       ),

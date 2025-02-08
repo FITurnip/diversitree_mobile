@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart'; // For kDebugMode
+import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // For kDebugMode
 
 class ApiService {
   static const _prefixUrl = '192.168.100.36:8000'; // The base URL without protocol
@@ -13,8 +14,18 @@ class ApiService {
     return Uri.http(_prefixUrl, 'api$path');
   }
 
+  static Future<Map<String, String>> _getTokenHeader() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? bearerToken = prefs.getString('token');
+    var header =  {
+      "Authorization": "Bearer ${bearerToken}",
+    };
+
+    return header;
+  }
+
   // GET request
-  static Future<http.Response> get(String path) async {
+  static Future<http.Response> get(String path, {required bool withAuth}) async {
     var _url = _setUri(path);
 
     // Print details in debug mode
@@ -22,9 +33,7 @@ class ApiService {
       print('ApiService: GET Request URL: $_url');
     }
 
-    var headers = {
-      "Authorization": "Bearer 67a6b2e14bd7a44671008a92|XHvuUXG7cDsSFyB8hA53dmuVbcBuIUpoP2H0keWJ60c68a53",
-    };
+    var headers = withAuth ? await _getTokenHeader() : null;
 
     var response = await http.get(_url, headers: headers);
 
@@ -37,7 +46,7 @@ class ApiService {
     return response;
   }
 
-  static Future<http.Response> post(String path, Map<String, dynamic>? body) async {
+  static Future<http.Response> post(String path, Map<String, dynamic>? body, {required bool withAuth}) async {
     var _url = _setUri(path);
 
     if (kDebugMode) {
@@ -45,12 +54,11 @@ class ApiService {
       print('ApiService: Request Body: $body');
     }
 
-    var headers = {
-      "Authorization": "Bearer 67a6b2e14bd7a44671008a92|XHvuUXG7cDsSFyB8hA53dmuVbcBuIUpoP2H0keWJ60c68a53",
-    };
-
     var request = http.MultipartRequest('POST', _url);
-    request.headers.addAll(headers);
+    if(withAuth) {
+      var headers = await _getTokenHeader();
+      request.headers.addAll(headers);
+    }
 
     // Ensure `body` is not null before iterating
     if (body != null) {

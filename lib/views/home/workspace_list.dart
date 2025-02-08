@@ -184,7 +184,7 @@ class WorkspaceController {
   static Future<void> setWorkspaceTable() async {
     workspaceTable = await LocalDbService.getAll('workspaces');
     if (workspaceTable.isEmpty) {
-      var response = await ApiService.get('/workspace/list');
+      var response = await ApiService.get('/workspace/list', withAuth: true);
       
       // Ensure the response body is valid JSON and is a list
       if (response.statusCode == 200) {
@@ -230,7 +230,7 @@ class WorkspaceController {
   static Future<void> setStatusWorkspaceTable() async {
     statusWorkspaceTable = await LocalDbService.getAll('status_workspaces');
     if (statusWorkspaceTable.isEmpty) {
-      var response = await ApiService.get('/status-workspace/list');
+      var response = await ApiService.get('/status-workspace/list', withAuth: false);
       
       // Ensure the response body is valid JSON and is a list
       if (response.statusCode == 200) {
@@ -294,7 +294,7 @@ class WorkspaceController {
 
 
   static Future<void> setWorkspaceData (String workspaceId) async{
-    var response = await ApiService.get('/workspace/detail/${workspaceId}');
+    var response = await ApiService.get('/workspace/detail/${workspaceId}', withAuth: true);
     var responseData = json.decode(response.body);
 
     workspaceData = responseData["response"];

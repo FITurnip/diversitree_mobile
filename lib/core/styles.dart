@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color lightPrimary = Color(0xFFF2FCF7);
   static const Color primary = Color(0xFF08CB4A);  // Leaf Green
   static const Color secondary = Color(0xFFB0B0B0); // Lighter Grey (closer to white)
   static const Color tertiary = Color(0xFFE0E0E0);   // Light Grey (not too white)
