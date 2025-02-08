@@ -3,10 +3,10 @@ import 'package:diversitree_mobile/components/stepper_information.dart';
 import 'package:diversitree_mobile/components/diversitree_app_bar.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/core/workspace_service.dart';
-import 'package:diversitree_mobile/views/pemotretan_pohon.dart';
-import 'package:diversitree_mobile/views/shannon_wanner_table.dart';
-import 'package:diversitree_mobile/views/workspace_init.dart';
-import 'package:diversitree_mobile/views/menentukan_koordinat.dart';
+import 'package:diversitree_mobile/views/workspace/pemotretan_pohon.dart';
+import 'package:diversitree_mobile/views/workspace/shannon_wanner_table.dart';
+import 'package:diversitree_mobile/views/workspace/workspace_init.dart';
+import 'package:diversitree_mobile/views/workspace/menentukan_koordinat.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

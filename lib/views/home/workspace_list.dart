@@ -5,7 +5,7 @@ import 'package:diversitree_mobile/core/workspace_service.dart';
 import 'package:diversitree_mobile/helper/api_service.dart';
 import 'package:diversitree_mobile/helper/format_text_service.dart';
 import 'package:diversitree_mobile/helper/local_db_service.dart';
-import 'package:diversitree_mobile/views/workspace_master.dart';
+import 'package:diversitree_mobile/views/workspace/workspace_master.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

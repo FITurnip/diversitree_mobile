@@ -5,7 +5,7 @@ import 'package:diversitree_mobile/components/ringkasan_informasi.dart';
 import 'package:diversitree_mobile/core/camera_service.dart';
 import 'package:diversitree_mobile/core/styles.dart';
 import 'package:diversitree_mobile/helper/api_service.dart';
-import 'package:diversitree_mobile/views/identifikasi_pohon.dart';
+import 'package:diversitree_mobile/views/workspace/identifikasi_pohon.dart';
 import 'package:flutter/material.dart';
 
 class PemotretanPohon extends StatefulWidget {
