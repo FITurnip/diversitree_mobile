@@ -80,7 +80,14 @@ class WorkspaceTimService {
     }
   }
 
-  static Future<List<Map<String, dynamic>>> addToTim(String workspaceId) async {
-    return await _hitApi(workspaceId, '/workspace/tim/tambah-anggota');
+  static Future<Map<String, dynamic>> addToTim(String workspaceId) async {
+    var response = await _hitApi(workspaceId, '/workspace/tim/tambah-anggota');
+    var responseData = json.decode(response.body);
+    
+    if (responseData['response'] is Map<String, dynamic>) {
+      return responseData['response'] as Map<String, dynamic>;
+    } else {
+      throw Exception("Unexpected responseData['response'] format: ${responseData['response']}");
+    }
   }
 }
