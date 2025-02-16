@@ -12,7 +12,7 @@ class AuthService {
   }
 
   static Future<void> prepare() async {
-    _setUserData();
+    await _setUserData();
   }
 
   static Map<String, dynamic> getCurrentUserData() {

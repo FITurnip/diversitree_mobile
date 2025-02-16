@@ -6,7 +6,8 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // For kDebugMode
 
 class ApiService {
-  static const _prefixUrl = '192.168.100.36:8000'; // The base URL without protocol
+  // static const _prefixUrl = '192.168.100.36:8000'; // The base URL without protocol
+  static const _prefixUrl = '103.127.139.174';
 
   static const urlStorage = 'http://$_prefixUrl/storage/';
 

@@ -5,8 +5,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  CameraService.initializeCameras();
-  AuthService.prepare();
   runApp(Diversitree());
 }
 
@@ -20,14 +18,16 @@ class Diversitree extends StatefulWidget {
 }
 
 class DiversitreeState extends State<Diversitree> {
-  Future<void> requestPermissions() async {
+  Future<void> initialization() async {
     await Permission.storage.request();
+    await CameraService.initializeCameras();
+    await AuthService.prepare();
   }
 
   @override
   void initState() {
     super.initState();
-    requestPermissions();
+    initialization();
   }
 
   @override

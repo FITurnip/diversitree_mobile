@@ -1,4 +1,4 @@
-package com.example.diversitree_mobile
+package com.diversitree
 
 import io.flutter.embedding.android.FlutterActivity
 

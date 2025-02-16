@@ -75,6 +75,7 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
     accuracy: LocationAccuracy.high,
     distanceFilter: 1,
   );
+  
   String locationMessage = 'Requesting location...';
 
   Future<void> _checkPermissionsAndStartStream() async {
@@ -162,99 +163,99 @@ class _DashedBorderBoxState extends State<DashedBorderBox> {
         SizedBox(height: 16,),
 
         Center(
-          child: Container(
+          child: SizedBox(
+            width: 120, // Constraining width
+            height: 120, // Constraining height
             child: Stack(
-              clipBehavior: Clip.none, // Allow overflow of the circles
+              alignment: Alignment.center,
+              clipBehavior: Clip.hardEdge, // Ensures no overflow
               children: [
-                // Main box with dashed border
+                // 🔹 Main box with dashed border
                 Container(
-                  height: 100, // Fixed height
-                  width: 100,  // Fixed width
+                  height: 100,
+                  width: 100,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.transparent), // Invisible border for dashed effect
+                    border: Border.all(color: Colors.transparent),
                   ),
                   child: CustomPaint(
                     painter: DashedBorderPainter(),
                   ),
                 ),
-                
-                // Circles on the corners (just circular containers, no interaction)
+
+                // 🔹 Circles on corners
                 for (var entry in koordinat.entries)
                   Positioned(
-                    // Check the position and apply the correct `top`, `left`, `bottom`, or `right`
-                    top: entry.key == 'kiri_atas' || entry.key == 'kanan_atas' ? -8 : null,
-                    left: entry.key == 'kiri_atas' || entry.key == 'kiri_bawah' ? -8 : null,
-                    right: entry.key == 'kanan_atas' || entry.key == 'kanan_bawah' ? -8 : null,
-                    bottom: entry.key == 'kiri_bawah' || entry.key == 'kanan_bawah' ? -8 : null,
+                    top: entry.key == 'kiri_atas' || entry.key == 'kanan_atas' ? 0 : null,
+                    left: entry.key == 'kiri_atas' || entry.key == 'kiri_bawah' ? 0 : null,
+                    right: entry.key == 'kanan_atas' || entry.key == 'kanan_bawah' ? 0 : null,
+                    bottom: entry.key == 'kiri_bawah' || entry.key == 'kanan_bawah' ? 0 : null,
                     child: CircleContainer(
                       position: entry.key,
                       circleColor: circleColor,
                       isChecked: koordinat[entry.key]['x'] != null,
                     ),
                   ),
-                
 
-                // Clickable areas divided into four sections
+                // 🔹 Clickable Areas (Now Adjusted)
                 Positioned.fill(
-                  child: Row(
-                    children: [
-                      // Left half
-                      Expanded(
-                        child: Column(
-                          children: [
-                            // Top-left clickable area (fixed size of 50x50)
-                            GestureDetector(
-                              onTap: () => _onSectionTap('kiri_atas'),
-                              child: Container(
-                                width: 50, // Fixed size
-                                height: 50, // Fixed size
-                                color: Colors.transparent, // Invisible container for tapping
+                  child: Container(
+                    child: Row(
+                      children: [
+                        // Left side
+                        Expanded(
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () => _onSectionTap('kiri_atas'),
+                                child: SizedBox(
+                                  width: 60, // 🔹 Reduced slightly to avoid overflow
+                                  height: 60,
+                                  child: ColoredBox(color: Colors.transparent),
+                                ),
                               ),
-                            ),
-                            // Bottom-left clickable area (fixed size of 50x50)
-                            GestureDetector(
-                              onTap: () => _onSectionTap('kiri_bawah'),
-                              child: Container(
-                                width: 50, // Fixed size
-                                height: 50, // Fixed size
-                                color: Colors.transparent, // Invisible container for tapping
+                              GestureDetector(
+                                onTap: () => _onSectionTap('kiri_bawah'),
+                                child: SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: ColoredBox(color: Colors.transparent),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      // Right half
-                      Expanded(
-                        child: Column(
-                          children: [
-                            // Top-right clickable area (fixed size of 50x50)
-                            GestureDetector(
-                              onTap: () => _onSectionTap('kanan_atas'),
-                              child: Container(
-                                width: 50, // Fixed size
-                                height: 50, // Fixed size
-                                color: Colors.transparent, // Invisible container for tapping
+                        // Right side
+                        Expanded(
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () => _onSectionTap('kanan_atas'),
+                                child: SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: ColoredBox(color: Colors.transparent),
+                                ),
                               ),
-                            ),
-                            // Bottom-right clickable area (fixed size of 50x50)
-                            GestureDetector(
-                              onTap: () => _onSectionTap('kanan_bawah'),
-                              child: Container(
-                                width: 50, // Fixed size
-                                height: 50, // Fixed size
-                                color: Colors.transparent, // Invisible container for tapping
+                              GestureDetector(
+                                onTap: () => _onSectionTap('kanan_bawah'),
+                                child: SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: ColoredBox(color: Colors.transparent),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ),
+
 
 
         SizedBox(height: 32,),
@@ -389,14 +390,6 @@ class CircleContainer extends StatefulWidget {
 }
 
 class _CircleContainerState extends State<CircleContainer> {
-  late bool _isChecked;
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize the checked state from the widget's initial value
-    _isChecked = widget.isChecked;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -409,7 +402,7 @@ class _CircleContainerState extends State<CircleContainer> {
           color: widget.circleColor[widget.position], // Set the background color based on state
           shape: BoxShape.circle, // Circular shape
         ),
-        child: _isChecked
+        child: widget.isChecked
             ? Icon(Icons.check, color: Colors.white, size: 10)
             : null,
       ),
