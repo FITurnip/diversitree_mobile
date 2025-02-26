@@ -1,3 +1,4 @@
+import 'package:diversitree_mobile/views/home/log_service.dart';
 import 'package:flutter/foundation.dart'; // Required for kDebugMode
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -22,6 +23,8 @@ class LocalDbService {
 
     if (kDebugMode) {
       print('LocalDbWorkspace: Initializing database at path: $path');
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Initializing database at path: $path');
     }
 
     final db = await openDatabase(
@@ -31,6 +34,8 @@ class LocalDbService {
       onCreate: (db, version) async {
         if (kDebugMode) {
           print('LocalDbWorkspace: Creating table: workspaces');
+        } else {
+          LogService.writeToLog('LocalDbWorkspace: Creating table: workspaces');
         }
 
         // Create the 'workspaces' table
@@ -67,6 +72,8 @@ class LocalDbService {
     try {
       if (kDebugMode) {
         print('LocalDbWorkspace: Dropping all rows from table: workspaces');
+      } else {
+        LogService.writeToLog('LocalDbWorkspace: Dropping all rows from table: workspaces');
       }
 
       // Attempt to delete all rows from the table
@@ -74,11 +81,15 @@ class LocalDbService {
 
       if (kDebugMode) {
         print('LocalDbWorkspace: All rows deleted from table: workspaces');
+      } else {
+        LogService.writeToLog('LocalDbWorkspace: All rows deleted from table: workspaces');
       }
     } catch (e) {
       // Catch any exception and print/log it
       if (kDebugMode) {
         print('Error deleting rows from workspaces: $e');
+      } else {
+        LogService.writeToLog('Error deleting rows from workspaces: $e');
       }
     }
 
@@ -99,15 +110,21 @@ class LocalDbService {
         await dbFile.delete();
         if (kDebugMode) {
           print('LocalDbWorkspace: Database dropped at path: $path');
+        } else {
+          LogService.writeToLog('LocalDbWorkspace: Database dropped at path: $path');
         }
       } else {
         if (kDebugMode) {
           print('LocalDbWorkspace: Database file does not exist at path: $path');
+        } else {
+          LogService.writeToLog('LocalDbWorkspace: Database file does not exist at path: $path');
         }
       }
     } catch (e) {
       if (kDebugMode) {
         print('LocalDbWorkspace: Error dropping database: $e');
+      } else {
+        LogService.writeToLog('LocalDbWorkspace: Error dropping database: $e');
       }
     }
 
@@ -134,6 +151,8 @@ class LocalDbService {
     await batch.commit();
     if (kDebugMode) {
       print('LocalDbWorkspace: Inserted ${data.length} records into $table');
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Inserted ${data.length} records into $table');
     }
   }
 
@@ -142,6 +161,8 @@ class LocalDbService {
     final db = await _getDatabase;
     if (kDebugMode) {
       print('LocalDbWorkspace: Inserting into $table: $data');
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Inserting into $table: $data');
     }
     return await db.insert(table, data);
   }
@@ -165,6 +186,8 @@ class LocalDbService {
 
     if (kDebugMode) {
       print('LocalDbWorkspace: Inserted $insertedCount records into $table');
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Inserted $insertedCount records into $table');
     }
 
     return insertedCount; // Return the count of inserted records
@@ -177,6 +200,8 @@ class LocalDbService {
     // Print the incoming item for debugging purposes only in debug mode
     if (kDebugMode) {
       print("Received item for insertOrUpdate: $item");
+    } else {
+      LogService.writeToLog("Received item for insertOrUpdate: $item");
     }
 
     String? existingItemId = item['id'];
@@ -185,6 +210,8 @@ class LocalDbService {
       // If the id is not null, try updating the existing record
       if (kDebugMode) {
         print("Item has an existing id: $existingItemId");
+      } else {
+        LogService.writeToLog("Item has an existing id: $existingItemId");
       }
 
       int count = await db.update(
@@ -198,6 +225,8 @@ class LocalDbService {
         // If no rows were updated (i.e., no record found), insert it as new
         if (kDebugMode) {
           print("No record found with id $existingItemId. Inserting new record.");
+        } else {
+          LogService.writeToLog("No record found with id $existingItemId. Inserting new record.");
         }
         await db.insert(
           table,
@@ -206,16 +235,22 @@ class LocalDbService {
         );
         if (kDebugMode) {
           print("New record inserted: $item");
+        } else {
+          LogService.writeToLog("New record inserted: $item");
         }
       } else {
         if (kDebugMode) {
           print("Existing record updated with id: $existingItemId");
+        } else {
+          LogService.writeToLog("Existing record updated with id: $existingItemId");
         }
       }
     } else {
       // If no id exists (new record), insert it directly
       if (kDebugMode) {
         print("No existing id, inserting new record.");
+      } else {
+        LogService.writeToLog("No existing id, inserting new record.");
       }
       await db.insert(
         table,
@@ -224,6 +259,8 @@ class LocalDbService {
       );
       if (kDebugMode) {
         print("New record inserted: $item");
+      } else {
+        LogService.writeToLog("New record inserted: $item");
       }
     }
   }
@@ -234,6 +271,8 @@ class LocalDbService {
     final data = await db.query(table); // First get the data from the DB
     if (kDebugMode) {
       print('LocalDbWorkspace: Data retrieved from $table: $data'); // Then print the data
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Data retrieved from $table: $data'); // Then print the data
     }
     return data; // Return the fetched data
   }
@@ -250,6 +289,8 @@ class LocalDbService {
     );
     if (kDebugMode) {
       print('LocalDbWorkspace: Updated $rowsUpdated rows in $table with $data where $where args: $whereArgs');
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Updated $rowsUpdated rows in $table with $data where $where args: $whereArgs');
     }
     return rowsUpdated;
   }
@@ -264,6 +305,8 @@ class LocalDbService {
     );
     if (kDebugMode) {
       print('LocalDbWorkspace: Deleted $rowsDeleted rows from $table where $where args: $whereArgs');
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Deleted $rowsDeleted rows from $table where $where args: $whereArgs');
     }
     return rowsDeleted;
   }
@@ -274,6 +317,8 @@ class LocalDbService {
     final data = await db.rawQuery(sql, args); // First get the data
     if (kDebugMode) {
       print('LocalDbWorkspace: Raw query executed: $sql args: $args, result: $data'); // Then print the result
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Raw query executed: $sql args: $args, result: $data'); // Then print the result
     }
     return data; // Return the fetched data
   }
@@ -283,6 +328,8 @@ class LocalDbService {
     final db = await _getDatabase;
     if (kDebugMode) {
       print('LocalDbWorkspace: Executing SQL command: $sql');
+    } else {
+      LogService.writeToLog('LocalDbWorkspace: Executing SQL command: $sql');
     }
     await db.execute(sql);
   }

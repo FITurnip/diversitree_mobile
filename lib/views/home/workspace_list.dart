@@ -9,6 +9,7 @@ import 'package:diversitree_mobile/helper/local_db_service.dart';
 import 'package:diversitree_mobile/views/workspace/workspace_master.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class WorkspaceList extends StatefulWidget {
   @override
@@ -21,9 +22,9 @@ class _WorkspaceListState extends State<WorkspaceList> {
   Future<void> _initializeWorkspace() async {
     // await LocalDbService.dropDatabase();
     // Initialize workspace in initState using widget.workspaceTable
-    await WorkspaceController.setStatusWorkspaceTable();
+    await WorkspaceController.setStatusWorkspaceTable(context);
     bool isLoggedIn = await AuthService.checkAuth();
-    if(isLoggedIn) await WorkspaceController.setWorkspaceTable();
+    if(isLoggedIn && mounted) await WorkspaceController.setWorkspaceTable(context);
     setState(() {
       _isLoading = false;
     });
@@ -41,6 +42,7 @@ class _WorkspaceListState extends State<WorkspaceList> {
       backgroundColor: Colors.white,
       appBar: DiversitreeAppBar(),
       floatingActionButton: AddWorkspaceButton(),
+      // body: Text('${WorkspaceController.statusWorkspaceTable}'),
       body: !_isLoading ? Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.builder(
@@ -183,20 +185,16 @@ class WorkspaceController {
   static List<Map<String, dynamic>> statusWorkspaceTable = [];
   static Map<String, dynamic> workspaceData = {};
 
-  static Future<void> setWorkspaceTable() async {
+  static Future<void> setWorkspaceTable(BuildContext context) async {
     workspaceTable = await LocalDbService.getAll('workspaces');
     if (workspaceTable.isEmpty) {
       var response = await ApiService.get('/workspace/list', withAuth: true);
       
-      // Ensure the response body is valid JSON and is a list
       if (response.statusCode == 200) {
         try {
           var responseData = json.decode(response.body);
 
-          // Check if the response is indeed a List
           if (responseData["response"] is List) {
-            print("panjang response data ${responseData['response'].length}");
-            // Now, we can safely cast it to List<Map<String, dynamic>>
             workspaceTable = List<Map<String, dynamic>>.from(responseData["response"]).map((record) {
               return {
                 "id": record["id"],
@@ -209,39 +207,36 @@ class WorkspaceController {
 
             await LocalDbService.insertAll('workspaces', workspaceTable);
           } else {
-            // Handle the case where the response data is not a list
-            if (kDebugMode) {
-              print('Unexpected response data format: Expected a List.');
-            }
+            if (kDebugMode) print('Unexpected response format: Expected a List.');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: Unexpected response format.'), backgroundColor: Colors.red),
+            );
           }
         } catch (e) {
-          // Handle JSON decoding errors
-          if (kDebugMode) {
-            print('Error decoding response body: $e');
-          }
+          if (kDebugMode) print('Error decoding response: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: Failed to parse response.'), backgroundColor: Colors.red),
+          );
         }
       } else {
-        // Handle the case where the API request fails
-        if (kDebugMode) {
-          print('API request failed with status code: ${response.statusCode}');
-        }
+        if (kDebugMode) print('API request failed with status: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: API request failed (${response.statusCode}).'), backgroundColor: Colors.red),
+        );
       }
     }
   }
 
-  static Future<void> setStatusWorkspaceTable() async {
+  static Future<void> setStatusWorkspaceTable(BuildContext context) async {
     statusWorkspaceTable = await LocalDbService.getAll('status_workspaces');
     if (statusWorkspaceTable.isEmpty) {
       var response = await ApiService.get('/status-workspace/list', withAuth: false);
       
-      // Ensure the response body is valid JSON and is a list
       if (response.statusCode == 200) {
         try {
           var responseData = json.decode(response.body);
 
-          // Check if the response is indeed a List
           if (responseData["response"] is List) {
-            // Now, we can safely cast it to List<Map<String, dynamic>>
             statusWorkspaceTable = List<Map<String, dynamic>>.from(responseData["response"]).map((record) {
               return {
                 "urutan": record["urutan"],
@@ -251,22 +246,22 @@ class WorkspaceController {
 
             await LocalDbService.insertAll('status_workspaces', statusWorkspaceTable);
           } else {
-            // Handle the case where the response data is not a list
-            if (kDebugMode) {
-              print('Unexpected response data format: Expected a List.');
-            }
+            if (kDebugMode) print('Unexpected response format: Expected a List.');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: Unexpected response format.'), backgroundColor: Colors.red),
+            );
           }
         } catch (e) {
-          // Handle JSON decoding errors
-          if (kDebugMode) {
-            print('Error decoding response body: $e');
-          }
+          if (kDebugMode) print('Error decoding response: $e');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: Failed to parse response.'), backgroundColor: Colors.red),
+          );
         }
       } else {
-        // Handle the case where the API request fails
-        if (kDebugMode) {
-          print('API request failed with status code: ${response.statusCode}');
-        }
+        if (kDebugMode) print('API request failed with status: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: API request failed (${response.statusCode}).'), backgroundColor: Colors.red),
+        );
       }
     }
   }

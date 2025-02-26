@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:diversitree_mobile/views/home/log_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
@@ -36,6 +37,8 @@ class ApiService {
     // Print details in debug mode
     if (kDebugMode) {
       print('ApiService: GET Request URL: $_url');
+    } else {
+      LogService.writeToLog('ApiService: GET Request URL: $_url');
     }
 
     var headers = withAuth ? await _getTokenHeader() : null;
@@ -46,6 +49,9 @@ class ApiService {
     if (kDebugMode) {
       print('ApiService: Response Status Code: ${response.statusCode}');
       print('ApiService: Response Body: ${response.body}');
+    } else {
+      LogService.writeToLog('ApiService: Response Status Code: ${response.statusCode}');
+      LogService.writeToLog('ApiService: Response Body: ${response.body}');
     }
 
     return response;
@@ -57,6 +63,9 @@ class ApiService {
     if (kDebugMode) {
       print('ApiService: POST Request URL: $_url');
       print('ApiService: Request Body: $body');
+    } else {
+      LogService.writeToLog('ApiService: POST Request URL: $_url');
+      LogService.writeToLog('ApiService: Request Body: $body');
     }
 
     var request = http.MultipartRequest('POST', _url);
@@ -78,6 +87,9 @@ class ApiService {
     if (kDebugMode) {
       print('ApiService: Response Status Code: ${response.statusCode}');
       print('ApiService: Response Body: $responseBody');
+    } else {
+      LogService.writeToLog('ApiService: Response Status Code: ${response.statusCode}');
+      LogService.writeToLog('ApiService: Response Body: $responseBody');
     }
 
     // Handle the response
